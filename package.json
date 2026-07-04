@@ -1,0 +1,28 @@
+{
+  "name": "seshat",
+  "version": "1.0.0",
+  "description": "Seshat - Build for curious minds, where knowledge lives. The Build is in progress",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Akash-G3/seshat.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Akash-G3/seshat/issues"
+  },
+  "homepage": "https://github.com/Akash-G3/seshat#readme",
+  "devDependencies": {
+    "@types/node": "^26.1.0",
+    "tsx": "^4.23.0",
+    "typescript": "^6.0.3"
+  }
+}
