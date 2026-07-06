@@ -19,7 +19,7 @@ out/
 .env.test.local
 .env.production
 .env.production.local
-!.env.example
+!.env.sample
 
 # ===== Logs =====
 logs/
