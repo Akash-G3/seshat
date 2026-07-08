@@ -1,12 +1,13 @@
 import dotenv from 'dotenv';
 import { z } from 'zod';
+import { EApplicationEnvironment } from '../constants/application';
 
 dotenv.config();
-//load .env file into process.emv
+//load .env file into process.env
 
 //Define the shape and rules for every env var your app needs
 const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z.enum(EApplicationEnvironment).default(EApplicationEnvironment.DEVELOPMENT),
   PORT: z.coerce.number().default(3000),
   SERVER_URL: z.url(),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
