@@ -1,14 +1,14 @@
-import { NextFunction, Request, Response } from 'express'
-import httpResponse from '../utils/httpResponse'
-import responseMessage from '../constants/responseMessage'
-import httpError from '../utils/httpError'
+import { NextFunction, Request, Response } from 'express';
+import httpResponse from '../utils/httpResponse';
+import responseMessage from '../constants/responseMessage';
+import httpError from '../utils/httpError';
 
 export default {
-    self: (req: Request, res: Response, next: NextFunction) => {
-        try {
-            httpResponse(req, res, 200, responseMessage.SUCCESS)
-        } catch (err) {
-            httpError(next, err, req, 500)
-        }
+  self: (req: Request, res: Response, next: NextFunction) => {
+    try {
+      httpResponse(req, res, 200, responseMessage.SUCCESS);
+    } catch (err) {
+      httpError(next, err, req, 500);
     }
-}
+  },
+};
