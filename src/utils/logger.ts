@@ -4,6 +4,10 @@ import util from 'util';
 import path from 'node:path';
 import { createLogger, format, transports } from 'winston';
 import { ConsoleTransportInstance, FileTransportInstance } from 'winston/lib/winston/transports';
+import * as sourceMapSupport from 'source-map-support';
+
+//Linking trace support  [source map]
+sourceMapSupport.install()
 
 const consoleLogFormat = format.printf((info) => {
   const { level, message, timestamp, meta = {} } = info;
