@@ -1,16 +1,16 @@
 {
   "name": "seshat",
+  "private": "true",
   "version": "1.0.0",
   "description": "Seshat - Build for curious minds, where knowledge lives. The Build is in progress",
-  "main": "src/server.js",
+  "main": "index.js",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "backend": "npm run dev --workspace backend",
+    "frontend": "npm run dev --workspace frontend"
   },
   "repository": {
     "type": "git",
@@ -23,27 +23,5 @@
   "bugs": {
     "url": "https://github.com/Akash-G3/seshat/issues"
   },
-  "homepage": "https://github.com/Akash-G3/seshat#readme",
-  "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@types/express": "^5.0.6",
-    "@types/node": "^26.1.0",
-    "@types/pg": "^8.20.0",
-    "@types/source-map-support": "^0.5.10",
-    "eslint": "^10.6.0",
-    "eslint-config-prettier": "^10.1.8",
-    "prettier": "^3.9.4",
-    "tsx": "^4.23.0",
-    "typescript": "^6.0.3",
-    "typescript-eslint": "^8.62.1"
-  },
-  "dependencies": {
-    "colorette": "^2.0.20",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "pg": "^8.22.0",
-    "source-map-support": "^0.5.21",
-    "winston": "^3.19.0",
-    "zod": "^4.4.3"
-  }
+  "homepage": "https://github.com/Akash-G3/seshat#readme"
 }
