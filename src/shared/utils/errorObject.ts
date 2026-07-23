@@ -1,8 +1,8 @@
 import { Request } from 'express';
-import { EApplicationEnvironment } from '../constants/application';
-import responseMessage from '../constants/responseMessage';
+import { EApplicationEnvironment } from '../../constants/application';
+import responseMessage from '../../constants/responseMessage';
 import { THttpError } from '../types/types';
-import { env } from '../config/env.js';
+import { env } from '../../config/env';
 import logger from './logger';
 
 export default (err: Error | unknown, req: Request, errorStatusCode: number = 500): THttpError => {

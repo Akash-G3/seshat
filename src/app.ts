@@ -1,9 +1,9 @@
 import express, { NextFunction, Request, Response } from 'express';
 import path from 'node:path';
-import router from './routes/apiRoute';
-import globalErrorHandler from './middlewares/globalErrorHandler';
+// Import routes here
+import globalErrorHandler from './shared/middlewares/globalErrorHandler';
 import responseMessage from './constants/responseMessage';
-import httpError from './utils/httpError';
+import httpError from './shared/utils/httpError';
 
 const app = express();
 
@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../', 'public')));
 
 //routes
-app.use('/api/v1', router);
+// app.use();
 
 //404Handler
 app.use((req: Request, _: Response, next: NextFunction) => {

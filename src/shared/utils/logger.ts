@@ -1,5 +1,5 @@
-import { env } from '../config/env.js';
-import { EApplicationEnvironment } from '../constants/application';
+import { env } from '../../config/env.js';
+import { EApplicationEnvironment } from '../../constants/application';
 import util from 'util';
 import path from 'node:path';
 import { createLogger, format, transports } from 'winston';
@@ -82,7 +82,7 @@ const fileLogFormat = format.printf((info) => {
 const FileTransport = (): Array<FileTransportInstance> => {
   return [
     new transports.File({
-      filename: path.join(__dirname, '../', '../', 'logs', `${env.NODE_ENV}.log`),
+      filename: path.join(__dirname, '../', '../', '../', 'logs', `${env.NODE_ENV}.log`),
       level: 'info',
       format: format.combine(format.timestamp(), fileLogFormat),
     }),

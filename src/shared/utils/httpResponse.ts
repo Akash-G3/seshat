@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { THttpResponse } from '../types/types.js';
-import { env } from '../config/env.js';
-import { EApplicationEnvironment } from '../constants/application';
+import { env } from '../../config/env.js';
+import { EApplicationEnvironment } from '../../constants/application';
 import logger from './logger.js';
 
 export default (

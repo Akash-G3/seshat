@@ -1,10 +1,10 @@
 import { Pool, type QueryResultRow } from 'pg';
 import { env } from '../config/env';
-import logger from '../utils/logger';
+import logger from '../shared/utils/logger';
 
-// A Pool, not a single Client — pg.Pool manages a small set of reusable
+// A Pool, not a single Client  pg.Pool manages a small set of reusable
 // physical connections internally. Every pool.query() call borrows an
-// idle connection, runs the query, and returns it — you never manage
+// idle connection, runs the query, and returns it you never manage
 // connections manually for simple queries
 
 const pool = new Pool ({
@@ -27,7 +27,7 @@ pool.on('error', (err) => {
  * Generic <T> lets callers type the shape of rows they expect back.
  *
  * Why wrap pool.query() instead of exporting `pool` directly?
- * — This is the one seam you'll edit if you ever swap to an ORM:
+ * This is the one seam you'll edit if you ever swap to an ORM:
  *   the function signature (text in, rows out) can stay the same
  *   while the implementation underneath changes completely.
  */
@@ -43,7 +43,7 @@ export async function query<T extends QueryResultRow = QueryResultRow>(
 /**
  * For multi-step operations that must succeed or fail together
  * (e.g. transferring a value between two rows). Manually checks out
- * a client, so the release() in `finally` is mandatory — skipping it
+ * a client, so the release() in `finally` is mandatory skipping it
  * leaks a connection out of the pool permanently.
  */
 export async function withTransaction<T>(
@@ -59,16 +59,16 @@ export async function withTransaction<T>(
     await client.query('ROLLBACK');
     throw err;
   } finally {
-    client.release(); // returns the connection to the pool — always runs
+    client.release(); // returns the connection to the pool  always runs
   }
 }
 
-/** Called once on boot — confirms the database is reachable before serving traffic. */
+/** Called once on boot confirms the database is reachable before serving traffic. */
 export async function checkConnection(): Promise<void> {
   await pool.query('SELECT 1');
 }
 
-/** Called once on shutdown — closes all pooled connections cleanly. */
+/** Called once on shutdown  closes all pooled connections cleanly. */
 export async function closePool(): Promise<void> {
   await pool.end();
 }
