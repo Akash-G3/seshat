@@ -2,7 +2,7 @@
 import crypto from 'crypto';
 import { prisma } from '../../config/prisma';
 import { hashPassword } from '../../shared/utils/password';
-import  AppError  from '../../shared/utils/appError'; // your existing error middleware types
+import { AppError } from '../../shared/errors/appError'; // your existing error middleware types
 import { comparePassword } from '../../shared/utils/password';
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from '../../shared/utils/jwt';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../../shared/utils/email';
