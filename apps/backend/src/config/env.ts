@@ -11,7 +11,10 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(3000),
   SERVER_URL: z.url(),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
-  JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
+  JWT_ACCESS_SECRET: z.string().min(32),
+  JWT_REFRESH_SECRET: z.string().min(32),
+  RESEND_API_KEY: z.string().min(1),
+  CLIENT_URL: z.string().url(), // e.g. http://localhost:3000 in dev
 });
 
 //validate process.env against that shape

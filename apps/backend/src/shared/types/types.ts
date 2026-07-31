@@ -22,3 +22,4 @@ export type THttpError = {
   data: unknown;
   trace?: object | null;
 };
+

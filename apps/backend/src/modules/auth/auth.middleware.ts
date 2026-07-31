@@ -1,0 +1,28 @@
+// src/middlewares/authMiddleware.ts
+import { Request, Response, NextFunction } from 'express';
+import { verifyAccessToken } from '../../shared/utils/jwt';
+import  AppError  from '../../shared/utils/appError';
+
+export interface AuthenticatedRequest extends Request {
+  userId?: string;
+}
+
+export function requireAuth(
+  req: AuthenticatedRequest,
+  _: Response,
+  next: NextFunction
+) {
+  const accessToken = req.cookies.accessToken;
+
+  if (!accessToken) {
+    return next(new AppError('Not authenticated', 401));
+  }
+
+  try {
+    const payload = verifyAccessToken(accessToken);
+    req.userId = payload.userId;
+    next();
+  } catch {
+    return next(new AppError('Invalid or expired access token', 401));
+  }
+}
