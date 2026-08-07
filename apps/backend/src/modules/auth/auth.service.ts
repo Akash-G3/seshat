@@ -1,6 +1,7 @@
 
 import crypto from 'crypto';
 import { prisma } from '../../config/prisma';
+import { env } from "../../config/env"
 import { hashPassword } from '../../shared/utils/password';
 import { AppError } from '../../shared/errors/appError'; // your existing error middleware types
 import { comparePassword } from '../../shared/utils/password';
@@ -8,7 +9,7 @@ import { verifyRefreshToken, signAccessToken, signRefreshToken } from '../../sha
 import { sendVerificationEmail, sendPasswordResetEmail } from '../../shared/utils/email';
 
 
-export async function registerUser(email: string, password: string) {
+export async function registerUser(name: string, email: string, password: string) {
   const existingUser = await prisma.user.findUnique({ where: { email } });
   if (existingUser) {
     throw new AppError('Email already in use', 409);
@@ -18,12 +19,16 @@ export async function registerUser(email: string, password: string) {
 
   const user = await prisma.user.create({
     data: {
+      name,
       email,
       password: hashedPassword,
+      isVerified: !env.ENABLE_EMAIL_VERIFICATION, // for production environment only.
     },
   });
 
-  const verificationToken = crypto.randomBytes(32).toString('hex');
+  // environment dependent email verification , Temporary disable during development.
+  if (env.ENABLE_EMAIL_VERIFICATION) {
+      const verificationToken = crypto.randomBytes(32).toString('hex');
 
   await prisma.emailVerificationToken.create({
     data: {
@@ -35,8 +40,8 @@ export async function registerUser(email: string, password: string) {
 
   // TODO (Step 10): send verificationToken via email
   await sendVerificationEmail(user.email, verificationToken);
-
-  return { id: user.id, email: user.email };
+  }
+    return { id: user.id, name: user.name, email: user.email };
 }
 
 
