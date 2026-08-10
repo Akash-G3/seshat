@@ -1,4 +1,3 @@
-
 import crypto from 'crypto';
 import { prisma } from '../../config/prisma';
 import { env } from "../../config/env"
@@ -7,6 +6,7 @@ import { AppError } from '../../shared/errors/appError'; // your existing error 
 import { comparePassword } from '../../shared/utils/password';
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from '../../shared/utils/jwt';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../../shared/utils/email';
+import { workspaceService } from '../workspace/workspace.service';
 
 
 export async function registerUser(name: string, email: string, password: string) {
@@ -25,6 +25,9 @@ export async function registerUser(name: string, email: string, password: string
       isVerified: !env.ENABLE_EMAIL_VERIFICATION, // for production environment only.
     },
   });
+
+  // Every user gets one workspace on registration.
+  await workspaceService.create(user.id, `${name}'s Workspace`);
 
   // environment dependent email verification , Temporary disable during development.
   if (env.ENABLE_EMAIL_VERIFICATION) {
