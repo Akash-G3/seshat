@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import { signupSchema, type SignupInput } from "./auth.schema";
 import { signupRequest } from "./auth.api";
@@ -28,7 +28,9 @@ export function SignupForm() {
       });
     } catch (err) {
       const axiosErr = err as AxiosError<{ message?: string }>;
-      setServerError(axiosErr.response?.data?.message ?? "Signup failed. Try again.");
+      setServerError(
+        axiosErr.response?.data?.message ?? "Signup failed. Try again.",
+      );
     } finally {
       setIsSubmittingSignup(false);
     }
@@ -39,33 +41,36 @@ export function SignupForm() {
       <div className="w-full max-w-sm space-y-6 rounded-xl bg-white p-8 shadow-sm">
         <h1 className="text-xl font-semibold text-gray-900">Create account</h1>
 
-        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+          className="space-y-4"
+        >
+          <div>
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Name
+            </label>
 
-         <div>
-  <label
-    htmlFor="name"
-    className="block text-sm font-medium text-gray-700"
-  >
-    Name
-  </label>
+            <input
+              id="name"
+              type="text"
+              autoComplete="name"
+              {...register("name")}
+              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
+            />
 
-  <input
-    id="name"
-    type="text"
-    autoComplete="name"
-    {...register("name")}
-    className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
-  />
-
-  {errors.name && (
-    <p className="mt-1 text-sm text-red-600">
-      {errors.name.message}
-    </p>
-  )}
-</div>
+            {errors.name && (
+              <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+            )}
+          </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
             <input
               type="email"
               autoComplete="email"
@@ -73,12 +78,16 @@ export function SignupForm() {
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
             />
             {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              <p className="mt-1 text-sm text-red-600">
+                {errors.email.message}
+              </p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
             <input
               type="password"
               autoComplete="new-password"
@@ -86,7 +95,9 @@ export function SignupForm() {
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
             />
             {errors.password && (
-              <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+              <p className="mt-1 text-sm text-red-600">
+                {errors.password.message}
+              </p>
             )}
           </div>
 
@@ -101,7 +112,9 @@ export function SignupForm() {
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
             />
             {errors.confirmPassword && (
-              <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
+              <p className="mt-1 text-sm text-red-600">
+                {errors.confirmPassword.message}
+              </p>
             )}
           </div>
 
@@ -115,6 +128,21 @@ export function SignupForm() {
             {isSubmittingSignup ? "Creating account…" : "Create account"}
           </button>
         </form>
+        {/* //bottom element for login redirect */}
+        <div className="mt-8 border-t border-border/60 pt-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="group font-semibold text-foreground transition-colors hover:text-primary"
+            >
+              Log in
+              <span className="ml-1 inline-block transition-transform group-hover:translate-x-0.5">
+                →
+              </span>
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

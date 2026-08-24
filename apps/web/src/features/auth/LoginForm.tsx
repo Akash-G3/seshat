@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useState } from "react";
 import { loginSchema, type LoginInput } from "./auth.schema";
 import { loginRequest } from "./auth.api";
@@ -15,7 +15,8 @@ export function LoginForm() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [isSubmittingLogin, setIsSubmittingLogin] = useState(false);
 
-  const handoffMessage = (location.state as { message?: string } | null)?.message;
+  const handoffMessage = (location.state as { message?: string } | null)
+    ?.message;
 
   const {
     register,
@@ -33,7 +34,9 @@ export function LoginForm() {
       navigate("/workspace", { replace: true });
     } catch (err) {
       const axiosErr = err as AxiosError<{ message?: string }>;
-      setServerError(axiosErr.response?.data?.message ?? "Login failed. Try again.");
+      setServerError(
+        axiosErr.response?.data?.message ?? "Login failed. Try again.",
+      );
     } finally {
       setIsSubmittingLogin(false);
     }
@@ -51,9 +54,15 @@ export function LoginForm() {
           )}
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+          className="space-y-4"
+        >
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
             <input
               type="email"
               autoComplete="email"
@@ -61,12 +70,16 @@ export function LoginForm() {
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
             />
             {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              <p className="mt-1 text-sm text-red-600">
+                {errors.email.message}
+              </p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
             <input
               type="password"
               autoComplete="current-password"
@@ -74,7 +87,9 @@ export function LoginForm() {
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
             />
             {errors.password && (
-              <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+              <p className="mt-1 text-sm text-red-600">
+                {errors.password.message}
+              </p>
             )}
           </div>
 
@@ -88,6 +103,21 @@ export function LoginForm() {
             {isSubmittingLogin ? "Logging in…" : "Log in"}
           </button>
         </form>
+        {/* //bottom link to signup page */}
+        <div className="mt-8 border-t border-border/60 pt-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            New here?{" "}
+            <Link
+              to="/signup"
+              className="group font-semibold text-foreground transition-colors hover:text-primary"
+            >
+              Sign up
+              <span className="ml-1 inline-block transition-transform group-hover:translate-x-0.5">
+                →
+              </span>
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
