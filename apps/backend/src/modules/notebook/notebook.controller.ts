@@ -1,6 +1,6 @@
-import { Response, NextFunction } from "express";
-import { AuthenticatedRequest } from "../auth/auth.middleware";
-import { notebookService } from "./notebook.service";
+import { Response, NextFunction } from 'express';
+import { AuthenticatedRequest } from '../auth/auth.middleware';
+import { notebookService } from './notebook.service';
 
 export const notebookController = {
   create: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -16,9 +16,16 @@ export const notebookController = {
     }
   },
 
-  listByWorkspace: async (req: AuthenticatedRequest<{ workspaceId: string }>, res: Response, next: NextFunction) => {
+  listByWorkspace: async (
+    req: AuthenticatedRequest<{ workspaceId: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const notebooks = await notebookService.findAllByWorkspace(req.userId!, req.params.workspaceId);
+      const notebooks = await notebookService.findAllByWorkspace(
+        req.userId!,
+        req.params.workspaceId
+      );
       res.json({ success: true, data: notebooks });
     } catch (err) {
       next(err);

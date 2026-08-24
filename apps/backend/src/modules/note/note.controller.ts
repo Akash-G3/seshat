@@ -1,7 +1,7 @@
 // note.controller.ts
-import { Response, NextFunction } from "express";
-import { AuthenticatedRequest } from "../auth/auth.middleware";
-import { noteService } from "./note.service";
+import { Response, NextFunction } from 'express';
+import { AuthenticatedRequest } from '../auth/auth.middleware';
+import { noteService } from './note.service';
 
 export const noteController = {
   create: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -32,7 +32,7 @@ export const noteController = {
     try {
       const note = await noteService.findById(req.params.id, req.userId!);
       if (!note) {
-        res.status(404).json({ success: false, message: "Note not found" });
+        res.status(404).json({ success: false, message: 'Note not found' });
         return;
       }
       res.json({ success: true, data: note });
@@ -49,7 +49,7 @@ export const noteController = {
         notebookId: req.body.notebookId,
       });
       if (!note) {
-        res.status(404).json({ success: false, message: "Note not found" });
+        res.status(404).json({ success: false, message: 'Note not found' });
         return;
       }
       res.json({ success: true, data: note });

@@ -9,7 +9,7 @@ import { forgotPasswordSchema, resetPasswordSchema } from './auth.validator';
 import { requestPasswordReset, resetPassword } from './auth.service';
 
 export async function register(req: Request, res: Response) {
-  const {name, email, password } = registerSchema.parse(req.body);
+  const { name, email, password } = registerSchema.parse(req.body);
 
   const user = await registerUser(name, email, password);
 

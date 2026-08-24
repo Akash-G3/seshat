@@ -1,11 +1,13 @@
-import '../styles/App.css'
+import { RouterProvider } from "react-router-dom";
+import { AuthProvider } from "@app/AuthContext";
+import { router } from "@app/router";
 
 function App() {
   return (
-    <>
-      <h1>Dont judge the UI ( . . )</h1>
-    </>
-  )
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 }
 
 export default App

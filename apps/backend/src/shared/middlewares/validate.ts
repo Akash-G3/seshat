@@ -1,6 +1,6 @@
 // src/middlewares/validate.ts
-import { RequestHandler } from "express";
-import { ZodType } from "zod";
+import { RequestHandler } from 'express';
+import { ZodType } from 'zod';
 
 export const validate =
   (schema: ZodType): RequestHandler =>

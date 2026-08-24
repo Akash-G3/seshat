@@ -1,5 +1,5 @@
 // note.validator.ts
-import { z } from "zod";
+import { z } from 'zod';
 
 export const createNoteSchema = z.object({
   workspaceId: z.string(),

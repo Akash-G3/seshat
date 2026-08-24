@@ -1,17 +1,13 @@
 // module/authMiddleware.ts
 import { Request, Response, NextFunction } from 'express';
 import { verifyAccessToken } from '../../shared/utils/jwt';
-import { AppError }  from '../../shared/errors/appError';
+import { AppError } from '../../shared/errors/appError';
 
 export interface AuthenticatedRequest<P = Record<string, string>> extends Request<P> {
   userId?: string;
 }
 
-export function requireAuth(
-  req: AuthenticatedRequest,
-  _: Response,
-  next: NextFunction
-) {
+export function requireAuth(req: AuthenticatedRequest, _: Response, next: NextFunction) {
   const accessToken = req.cookies.accessToken;
 
   if (!accessToken) {

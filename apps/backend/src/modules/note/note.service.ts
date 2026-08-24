@@ -1,7 +1,7 @@
 // note.service.ts
-import { prisma } from "../../config/prisma";
-import { documentService } from "../document/document.service";
-import { CreateNoteInput, UpdateNoteInput } from "./note.types";
+import { prisma } from '../../config/prisma';
+import { documentService } from '../document/document.service';
+import { CreateNoteInput, UpdateNoteInput } from './note.types';
 
 export const noteService = {
   create: async ({ workspaceId, notebookId, ownerId, title, content }: CreateNoteInput) => {
@@ -14,8 +14,15 @@ export const noteService = {
   findAllByOwner: (ownerId: string) =>
     prisma.note.findMany({
       where: { ownerId },
-      select: { id: true, title: true, notebookId: true, workspaceId: true, updatedAt: true, createdAt: true },
-      orderBy: { updatedAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        notebookId: true,
+        workspaceId: true,
+        updatedAt: true,
+        createdAt: true,
+      },
+      orderBy: { updatedAt: 'desc' },
     }),
 
   findById: (id: string, ownerId: string) =>
@@ -43,6 +50,5 @@ export const noteService = {
     return noteService.findById(id, ownerId);
   },
 
-  remove: (id: string, ownerId: string) =>
-    prisma.note.deleteMany({ where: { id, ownerId } }),
+  remove: (id: string, ownerId: string) => prisma.note.deleteMany({ where: { id, ownerId } }),
 };

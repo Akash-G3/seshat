@@ -1,6 +1,6 @@
-import { Response, NextFunction } from "express";
-import { AuthenticatedRequest } from "../auth/auth.middleware";
-import { workspaceService } from "./workspace.service";
+import { Response, NextFunction } from 'express';
+import { AuthenticatedRequest } from '../auth/auth.middleware';
+import { workspaceService } from './workspace.service';
 
 export const workspaceController = {
   getMine: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

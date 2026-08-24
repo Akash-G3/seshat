@@ -1,13 +1,12 @@
 import crypto from 'crypto';
 import { prisma } from '../../config/prisma';
-import { env } from "../../config/env"
+import { env } from '../../config/env';
 import { hashPassword } from '../../shared/utils/password';
 import { AppError } from '../../shared/errors/appError'; // your existing error middleware types
 import { comparePassword } from '../../shared/utils/password';
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from '../../shared/utils/jwt';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../../shared/utils/email';
 import { workspaceService } from '../workspace/workspace.service';
-
 
 export async function registerUser(name: string, email: string, password: string) {
   const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -31,22 +30,21 @@ export async function registerUser(name: string, email: string, password: string
 
   // environment dependent email verification , Temporary disable during development.
   if (env.ENABLE_EMAIL_VERIFICATION) {
-      const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationToken = crypto.randomBytes(32).toString('hex');
 
-  await prisma.emailVerificationToken.create({
-    data: {
-      token: verificationToken,
-      userId: user.id,
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
-    },
-  });
+    await prisma.emailVerificationToken.create({
+      data: {
+        token: verificationToken,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
+      },
+    });
 
-  // TODO (Step 10): send verificationToken via email
-  await sendVerificationEmail(user.email, verificationToken);
+    // TODO (Step 10): send verificationToken via email
+    await sendVerificationEmail(user.email, verificationToken);
   }
-    return { id: user.id, name: user.name, email: user.email };
+  return { id: user.id, name: user.name, email: user.email };
 }
-
 
 export async function loginUser(email: string, password: string) {
   const user = await prisma.user.findUnique({ where: { email } });
@@ -149,7 +147,6 @@ export async function refreshTokens(incomingToken: string) {
 
   return { accessToken: newAccessToken, refreshToken: newRefreshToken };
 }
-
 
 export async function logoutUser(incomingToken: string | undefined) {
   if (!incomingToken) return; // nothing to do, already "logged out"

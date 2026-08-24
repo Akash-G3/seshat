@@ -1,4 +1,4 @@
-import { prisma } from "../../config/prisma";
+import { prisma } from '../../config/prisma';
 
 export const notebookService = {
   create: (ownerId: string, workspaceId: string, title: string) =>
@@ -7,9 +7,8 @@ export const notebookService = {
   findAllByWorkspace: (ownerId: string, workspaceId: string) =>
     prisma.notebook.findMany({
       where: { ownerId, workspaceId },
-      orderBy: { updatedAt: "desc" },
+      orderBy: { updatedAt: 'desc' },
     }),
 
-  remove: (id: string, ownerId: string) =>
-    prisma.notebook.deleteMany({ where: { id, ownerId } }),
+  remove: (id: string, ownerId: string) => prisma.notebook.deleteMany({ where: { id, ownerId } }),
 };
