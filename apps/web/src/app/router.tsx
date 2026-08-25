@@ -3,9 +3,11 @@ import { ProtectedRoute } from "@routes/ProtectedRoute";
 import { PublicOnlyRoute } from "@routes/PublicOnlyRoute";
 import { LoginForm } from "@features/auth/LoginForm";
 import { SignupForm } from "@features/auth/SignupForm";
-import { Workspace } from "@features/workspace/workspace"
+import { Workspace } from "@features/workspace/workspace";
+import { Home } from "@features/home/Home";
 
 export const router = createBrowserRouter([
+  { path: "/", element: <Home /> },
   {
     element: <PublicOnlyRoute />,
     children: [
@@ -15,8 +17,6 @@ export const router = createBrowserRouter([
   },
   {
     element: <ProtectedRoute />,
-    children: [
-      { path: "/workspace", element: <Workspace/> },
-    ],
+    children: [{ path: "/workspace", element: <Workspace /> }],
   },
 ]);

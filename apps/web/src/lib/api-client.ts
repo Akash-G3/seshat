@@ -20,7 +20,7 @@ let refreshPromise: Promise<unknown> | null = null;
 // Routes that render without a session. If a refresh fails while
 // already on one of these, do NOT redirect — see the note below on
 // why that matters.
-const PUBLIC_PATHS = ["/login", "/signup"];
+const PUBLIC_PATHS = ["/", "/login", "/signup"];
 
 apiClient.interceptors.response.use(
   (response) => response,
