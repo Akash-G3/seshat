@@ -8,7 +8,7 @@ export async function getNotes(): Promise<NoteSummary[]> {
 
 export async function createNote(payload: {
   workspaceId: string;
-  notebookId?: string | null;
+  notebookId?: string; // no longer `| null` — omit the key entirely for unfiled notes
   title?: string;
 }): Promise<Note> {
   const response = await apiClient.post("/notes", payload);

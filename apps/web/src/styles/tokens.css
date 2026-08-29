@@ -1,0 +1,24 @@
+/* Design tokens — single source of truth for the app's visual language.
+   Everything below should be referenced via these variables, not hardcoded hex values,
+   so the whole app can be retheme'd from this one file. */
+:root {
+  --bg: #ffffff;
+  --bg-subtle: #fafafa;
+  --bg-hover: #f1f1f2;
+  --border: #e4e4e7;
+
+  --text-primary: #18181b;
+  --text-secondary: #71717a;
+  --text-muted: #a1a1aa;
+
+  --accent: #0e7490;
+  --accent-subtle: #ecfeff;
+
+  --danger: #dc2626;
+  --danger-subtle: #fef2f2;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+
+  --row-height: 32px;
+}

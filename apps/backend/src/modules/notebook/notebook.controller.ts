@@ -32,15 +32,23 @@ export const notebookController = {
     }
   },
 
-  remove: async (req: AuthenticatedRequest<{ id: string }>, res: Response, next: NextFunction) => {
-    try {
-      await notebookService.remove(req.params.id, req.userId!);
-      res.status(204).send();
-    } catch (err) {
-      next(err);
+remove: async (
+  req: AuthenticatedRequest<{ id: string }>,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const deleted = await notebookService.remove(req.params.id, req.userId!);
+    if (!deleted) {
+      res.status(404).json({ success: false, message: "Notebook not found" });
+      return;
     }
-  },
-  //for renmae functions
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+},
+  //for rename functions
   update: async (
     req: AuthenticatedRequest<{ id: string }>,
     res: Response,
