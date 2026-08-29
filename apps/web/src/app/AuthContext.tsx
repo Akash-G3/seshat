@@ -5,7 +5,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { getMyWorkspace, type Workspace } from "@features/workspace/workspace.api";
+import { getMyWorkspace, type Workspace } from "@features/workspace/api/workspace.api";
+
 
 interface AuthContextValue {
   workspace: Workspace | null;

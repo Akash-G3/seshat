@@ -5,7 +5,7 @@ import { useState } from "react";
 import { loginSchema, type LoginInput } from "./auth.schema";
 import { loginRequest } from "./auth.api";
 import { useAuth } from "@app/AuthContext";
-import { getMyWorkspace } from "@features/workspace/workspace.api";
+import { getMyWorkspace } from "@features/workspace/api/workspace.api";
 import type { AxiosError } from "axios";
 
 export function LoginForm() {

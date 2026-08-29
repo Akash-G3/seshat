@@ -3,7 +3,7 @@ import { ProtectedRoute } from "@routes/ProtectedRoute";
 import { PublicOnlyRoute } from "@routes/PublicOnlyRoute";
 import { LoginForm } from "@features/auth/LoginForm";
 import { SignupForm } from "@features/auth/SignupForm";
-import { Workspace } from "@features/workspace/workspace";
+import { Workspace } from "@/features/workspace/pages/workspace";
 import { Home } from "@features/home/Home";
 
 export const router = createBrowserRouter([

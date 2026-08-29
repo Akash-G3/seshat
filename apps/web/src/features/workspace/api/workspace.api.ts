@@ -1,9 +1,5 @@
 import { apiClient } from "@lib/api-client";
-
-export interface Workspace {
-  id: string;
-  name: string;
-}
+import type { Workspace } from "../types/workspace.types";
 
 export async function getMyWorkspace(): Promise<Workspace> {
   const response = await apiClient.get("/workspace");

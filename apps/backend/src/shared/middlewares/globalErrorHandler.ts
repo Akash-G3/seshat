@@ -1,4 +1,3 @@
-
 ///Improvised global error handler
 import { NextFunction, Request, Response } from 'express';
 import errorObject from '../errors/errorObject';
