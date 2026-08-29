@@ -40,4 +40,23 @@ export const notebookController = {
       next(err);
     }
   },
+  //for renmae functions
+  update: async (
+    req: AuthenticatedRequest<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const notebook = await notebookService.rename(req.params.id, req.userId!, req.body.title);
+
+      if (!notebook) {
+        res.status(404).json({ success: false, message: 'Notebook not found' });
+        return;
+      }
+
+      res.json({ success: true, data: notebook });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
