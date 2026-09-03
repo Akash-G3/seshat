@@ -1,14 +1,15 @@
-// note.types.ts
+import { Prisma } from '@prisma/client';
+
 export interface CreateNoteInput {
   workspaceId: string;
   notebookId?: string;
   ownerId: string;
   title: string;
-  content?: object;
+  content?: Prisma.InputJsonValue;
 }
 
 export interface UpdateNoteInput {
   title?: string;
-  content?: object;
+  content?: Prisma.InputJsonValue;
   notebookId?: string | null;
 }

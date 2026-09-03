@@ -17,7 +17,7 @@ export interface Notebook {
 }
 
 export interface Note extends NoteSummary {
-  content: object; // Tiptap JSON
+  document: { content: object }; // BlockNote JSON — nested under `document`, matching the Prisma include in note.service.ts
   workspaceId: string;
 }
 

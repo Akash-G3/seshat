@@ -1,11 +1,10 @@
-// note.service.ts
 import { prisma } from '../../config/prisma';
 import { documentService } from '../document/document.service';
 import { CreateNoteInput, UpdateNoteInput } from './note.types';
 
 export const noteService = {
   create: async ({ workspaceId, notebookId, ownerId, title, content }: CreateNoteInput) => {
-    const document = await documentService.create(ownerId, content ?? {});
+    const document = await documentService.create(ownerId, content ?? []);
     return prisma.note.create({
       data: { workspaceId, notebookId, ownerId, title, documentId: document.id },
     });

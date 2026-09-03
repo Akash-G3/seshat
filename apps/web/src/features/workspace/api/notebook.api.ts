@@ -19,5 +19,3 @@ export async function renameNotebook(notebookId: string, title: string): Promise
 export async function deleteNotebook(notebookId: string): Promise<void> {
   await apiClient.delete(`/notebooks/${notebookId}`);
 }
-
-// No renameNotebook — backend has no PATCH /notebooks/:id yet

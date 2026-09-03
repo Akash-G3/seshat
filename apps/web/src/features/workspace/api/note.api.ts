@@ -22,7 +22,7 @@ export async function getNote(noteId: string): Promise<Note> {
 
 export async function updateNote(
   noteId: string,
-  payload: Partial<Pick<Note, "title" | "content">>
+  payload: { title?: string; content?: object; notebookId?: string | null }
 ): Promise<Note> {
   const response = await apiClient.patch(`/notes/${noteId}`, payload);
   return response.data.data;
