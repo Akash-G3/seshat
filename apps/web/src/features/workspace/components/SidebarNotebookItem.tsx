@@ -12,8 +12,6 @@ interface Props {
   notebook: { id: string; title: string; notes: NoteSummary[] };
   activeNoteId?: string;
   onSelectNote: (noteId: string) => void;
-  // Accepts both — a notebook's own delete request, and delete requests bubbled up
-  // from the SidebarNoteItem rows nested inside it.
   onDeleteRequest: (payload: { type: "notebook" | "note"; id: string; label: string }) => void;
 }
 
@@ -28,18 +26,40 @@ export function SidebarNotebookItem({
   const [isRenaming, setIsRenaming] = useState(false);
   const [draftTitle, setDraftTitle] = useState(notebook.title);
 
+  // New: inline "create note" state — mirrors the rename pattern above
+  const [isCreatingNote, setIsCreatingNote] = useState(false);
+  const [newNoteTitle, setNewNoteTitle] = useState("");
+
   const renameNotebook = useRenameNotebook(workspaceId);
   const createNote = useCreateNote(workspaceId);
 
   function commitRename() {
     setIsRenaming(false);
     const trimmed = draftTitle.trim();
-    // Skip the request entirely if nothing changed or it's empty — don't hit the API for no-ops
     if (!trimmed || trimmed === notebook.title) {
       setDraftTitle(notebook.title);
       return;
     }
     renameNotebook.mutate({ id: notebook.id, title: trimmed });
+  }
+
+  function startCreatingNote() {
+    // Make sure the notebook is open so the new input row is actually visible
+    setExpanded(true);
+    setNewNoteTitle("");
+    setIsCreatingNote(true);
+  }
+
+  function commitCreateNote() {
+    const trimmed = newNoteTitle.trim();
+    setIsCreatingNote(false);
+    if (!trimmed) return; // cancel silently if left empty
+    createNote.mutate({ notebookId: notebook.id, title: trimmed });
+  }
+
+  function cancelCreateNote() {
+    setIsCreatingNote(false);
+    setNewNoteTitle("");
   }
 
   return (
@@ -77,9 +97,8 @@ export function SidebarNotebookItem({
           </span>
         )}
 
-        {/* Hover-only actions — kept hidden by default so the tree stays visually quiet */}
         <div className="hidden group-hover:flex items-center gap-0.5 shrink-0">
-          <IconButton title="New note" onClick={() => createNote.mutate(notebook.id)}>
+          <IconButton title="New note" onClick={startCreatingNote}>
             <Plus size={14} />
           </IconButton>
           <DropdownMenu trigger={<IconButton title="More"><MoreHorizontal size={14} /></IconButton>}>
@@ -96,11 +115,27 @@ export function SidebarNotebookItem({
         </div>
       </div>
 
-      {/* Notes inside this notebook — reuses SidebarNoteItem so rename/delete
-          behave identically whether a note is filed here or sitting unfiled. */}
+      {/* Notes inside this notebook */}
       {expanded && (
         <div className="ml-5 border-l border-border pl-2">
-          {notebook.notes.length === 0 ? (
+          {isCreatingNote && (
+            <div className="flex items-center h-[28px] px-2">
+              <input
+                autoFocus
+                value={newNoteTitle}
+                onChange={(e) => setNewNoteTitle(e.target.value)}
+                onBlur={commitCreateNote}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") commitCreateNote();
+                  if (e.key === "Escape") cancelCreateNote();
+                }}
+                placeholder="Note title"
+                className="flex-1 min-w-0 text-sm bg-bg border border-accent rounded-sm px-1 outline-none"
+              />
+            </div>
+          )}
+
+          {notebook.notes.length === 0 && !isCreatingNote ? (
             <div className="px-2 py-1 text-xs text-text-muted italic">No notes yet</div>
           ) : (
             notebook.notes.map((note) => (
