@@ -130,7 +130,7 @@ export function SidebarNotebookItem({
                   if (e.key === "Escape") cancelCreateNote();
                 }}
                 placeholder="Note title"
-                className="flex-1 min-w-0 text-sm bg-bg border border-accent rounded-sm px-1 outline-none"
+                className="flex-1 min-w-0 text-sm bg-bg text-text-primary border border-accent rounded-sm px-1 outline-none placeholder:text-text-muted"
               />
             </div>
           )}

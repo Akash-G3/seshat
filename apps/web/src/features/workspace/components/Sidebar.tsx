@@ -1,25 +1,35 @@
+
 import { useState } from "react";
 import { useWorkspaceTree } from "../hooks/useWorkspaceTree";
 import { useCreateNotebook, useDeleteNotebook } from "../hooks/useNotebookMutations";
 import { useCreateNote, useDeleteNote } from "../hooks/useNoteMutations";
 import { SidebarNotebookItem } from "./SidebarNotebookItem";
 import { SidebarNoteItem } from "./SidebarNoteItem";
-import { WorkspaceHeader } from "./WorkspaceHeader";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { SidebarProfile } from "./SidebarProfile";
+
 
 interface SidebarProps {
   activeNoteId?: string;
   onSelectNote: (noteId: string) => void;
+  isCreatingNotebook: boolean;
+  setIsCreatingNotebook: (value: boolean) => void;
+  isCreatingNote: boolean;
+  setIsCreatingNote: (value: boolean) => void;
 }
 
 type DeleteTarget = { type: "notebook" | "note"; id: string; label: string } | null;
 
-export function Sidebar({ activeNoteId, onSelectNote }: SidebarProps) {
+export function Sidebar({
+  activeNoteId,
+  onSelectNote,
+  isCreatingNotebook,
+  setIsCreatingNotebook,
+  isCreatingNote,
+  setIsCreatingNote,
+}: SidebarProps) {
   const { workspace, tree, isLoading, isError } = useWorkspaceTree();
-  const [isCreatingNotebook, setIsCreatingNotebook] = useState(false);
   const [newNotebookTitle, setNewNotebookTitle] = useState("");
-  const [isCreatingNote, setIsCreatingNote] = useState(false);
   const [newNoteTitle, setNewNoteTitle] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null);
 
@@ -37,8 +47,6 @@ export function Sidebar({ activeNoteId, onSelectNote }: SidebarProps) {
   }
 
   function submitNewNote() {
-    // Always create — even a blank title falls back to "Untitled" inside the hook —
-    // so Enter or blur always produces a note, just like Notion's "type to name, blank is fine" behavior
     createNote.mutate({ notebookId: null, title: newNoteTitle });
     setNewNoteTitle("");
     setIsCreatingNote(false);
@@ -52,20 +60,22 @@ export function Sidebar({ activeNoteId, onSelectNote }: SidebarProps) {
   }
 
   if (isLoading) {
-    return <div className="w-[260px] p-4 text-sm text-text-muted">Loading workspace…</div>;
+    return (
+      <div className="w-full p-4 text-sm text-text-muted">
+        Loading workspace…
+      </div>
+    );
   }
   if (isError || !tree || !workspace) {
-    return <div className="w-[260px] p-4 text-sm text-danger">Couldn't load workspace</div>;
+    return (
+      <div className="w-full p-4 text-sm text-danger">
+        Couldn't load workspace
+      </div>
+    );
   }
 
   return (
-    <aside className="w-[260px] h-full bg-bg-subtle border-r border-border flex flex-col">
-      <WorkspaceHeader
-        workspaceName={workspace.name}
-        onNewNotebook={() => setIsCreatingNotebook(true)}
-        onNewNote={() => setIsCreatingNote(true)}
-      />
-
+    <aside className="w-full flex-1 min-h-0 bg-bg-subtle flex flex-col overflow-hidden">
       <div className="flex-1 overflow-y-auto px-2 py-2">
         {tree.notebooks.map((notebook) => (
           <SidebarNotebookItem
@@ -92,7 +102,7 @@ export function Sidebar({ activeNoteId, onSelectNote }: SidebarProps) {
               }
             }}
             placeholder="Notebook name"
-            className="w-full h-[32px] px-2 text-sm bg-bg border border-accent rounded-sm outline-none"
+            className="w-full h-[32px] px-2 text-sm bg-bg text-text-primary border border-accent rounded-sm outline-none placeholder:text-text-muted"
           />
         )}
 
@@ -116,7 +126,7 @@ export function Sidebar({ activeNoteId, onSelectNote }: SidebarProps) {
                   }
                 }}
                 placeholder="Note title"
-                className="w-full h-[32px] px-2 text-sm bg-bg border border-accent rounded-sm outline-none"
+               className="w-full h-[32px] px-2 text-sm bg-bg text-text-primary border border-accent rounded-sm outline-none placeholder:text-text-muted"
               />
             )}
 
@@ -140,7 +150,6 @@ export function Sidebar({ activeNoteId, onSelectNote }: SidebarProps) {
         )}
       </div>
 
-{/* // Sidebar Profile  */}
       <SidebarProfile />
 
       <ConfirmDialog

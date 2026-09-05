@@ -2,15 +2,16 @@ import { useState } from "react";
 import { Plus, Notebook, FileText } from "lucide-react";
 import { DropdownMenu, DropdownMenuItem } from "@/components/ui/DropdownMenu";
 import { IconButton } from "@/components/ui/IconButton";
-import { useRenameWorkspace } from "../hooks/useWorkspaceMutations";
+import { useRenameWorkspace } from "@features/workspace/hooks/useWorkspaceMutations";
+import { SIDEBAR_WIDTH } from "@features/workspace/constants";
 
 interface Props {
   workspaceName: string;
-  onNewNotebook: () => void;   // opens the inline "create notebook" input in Sidebar
-  onNewNote: () => void;       // creates an unfiled note directly
+  onNewNotebook: () => void;
+  onNewNote: () => void;
 }
 
-export function WorkspaceHeader({ workspaceName, onNewNotebook, onNewNote }: Props) {
+export function TopBarLeft({ workspaceName, onNewNotebook, onNewNote }: Props) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [draft, setDraft] = useState(workspaceName);
   const renameWorkspace = useRenameWorkspace();
@@ -26,7 +27,10 @@ export function WorkspaceHeader({ workspaceName, onNewNotebook, onNewNote }: Pro
   }
 
   return (
-    <div className="h-12 flex items-center justify-between px-3 border-b border-border shrink-0">
+    <div
+      style={{ width: SIDEBAR_WIDTH }}
+      className="h-12 flex items-center justify-between gap-2 px-3 border-b border-border bg-bg-subtle shrink-0"
+    >
       {isRenaming ? (
         <input
           autoFocus
@@ -52,7 +56,6 @@ export function WorkspaceHeader({ workspaceName, onNewNotebook, onNewNote }: Pro
         </span>
       )}
 
-      {/* Universal creation menu — the single entry point for adding anything to the workspace */}
       <DropdownMenu trigger={<IconButton title="Create"><Plus size={16} /></IconButton>}>
         <DropdownMenuItem onClick={onNewNotebook}>
           <span className="flex items-center gap-2">
