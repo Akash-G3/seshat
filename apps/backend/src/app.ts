@@ -5,6 +5,7 @@ import { corsOptions } from './config/cors';
 import path from 'node:path';
 import cookieParser from 'cookie-parser';
 import authRoutes from './modules/auth/auth.routes';
+import searchRoutes from './modules/search/search.routes';
 import noteRoutes from './modules/note/note.routes';
 import workspaceRoutes from './modules/workspace/workspace.routes';
 import notebookRoutes from './modules/notebook/notebook.routes';
@@ -33,6 +34,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/workspace', workspaceRoutes);
 app.use('/api/notebooks', notebookRoutes);
 app.use('/api/notes', noteRoutes);
+app.use('/api/search', searchRoutes);
 
 //7. 404Handler
 app.use((req: Request, _: Response, next: NextFunction) => {

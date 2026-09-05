@@ -9,15 +9,19 @@ import { useTabs } from "../../topbar/hooks/useTabs";
 import { useNavigationHistory } from "../../topbar/hooks/useNavigationHistory";
 import type { BreadcrumbSegment } from "../../topbar/types";
 import { SIDEBAR_WIDTH } from "../constants";
+import { QuickSwitcher } from "@features/search/QuickSwitcher";
+import { useRecentNotes } from "@features/search/useRecentNotes";
 
 export function Workspace() {
   const [activeNoteId, setActiveNoteId] = useState<string | undefined>();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isCreatingNotebook, setIsCreatingNotebook] = useState(false);
   const [isCreatingNote, setIsCreatingNote] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { workspace, tree } = useWorkspaceTree();
 
   const { tabs, activeTabId, setActiveTabId, openTab, closeTab, syncTitles } = useTabs();
+  const { recent: recentNotes, addRecent } = useRecentNotes();
 
   const findNote = useCallback(
     (noteId: string) => {
@@ -42,11 +46,13 @@ export function Workspace() {
   const handleSelectNote = useCallback(
     (noteId: string) => {
       const info = findNote(noteId);
-      openTab({ noteId, title: info?.title ?? "Untitled", notebookId: info?.notebookId ?? null });
+      const title = info?.title ?? "Untitled";
+      openTab({ noteId, title, notebookId: info?.notebookId ?? null });
       goToNote(noteId);
       push(noteId);
+      addRecent({ id: noteId, title });
     },
-    [findNote, openTab, goToNote, push]
+    [findNote, openTab, goToNote, push, addRecent]
   );
 
   const handleCloseTab = useCallback(
@@ -68,6 +74,17 @@ export function Workspace() {
     syncTitles(titleById);
   }, [tree, syncTitles]);
 
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const breadcrumbs: BreadcrumbSegment[] = useMemo(() => {
     if (!tree || !workspace || !activeNoteId) return [];
     const segments: BreadcrumbSegment[] = [{ id: workspace.id, label: workspace.name, type: "workspace" }];
@@ -85,7 +102,7 @@ export function Workspace() {
     return segments;
   }, [tree, workspace, activeNoteId]);
 
-   return (
+  return (
     <div className="flex h-screen bg-bg">
       <div
         className="flex flex-col shrink-0 border-r border-border overflow-hidden"
@@ -114,7 +131,7 @@ export function Workspace() {
           }}
           sidebarCollapsed={sidebarCollapsed}
           onToggleSidebar={() => setSidebarCollapsed((c) => !c)}
-          onOpenSearch={() => {/* wire to your search feature once it exists */}}
+          onOpenSearch={() => setIsSearchOpen(true)}
           tabs={tabs}
           activeTabId={activeTabId}
           onSelectTab={handleSelectNote}
@@ -132,6 +149,13 @@ export function Workspace() {
           )}
         </div>
       </div>
+
+      <QuickSwitcher
+        open={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        onSelectNote={handleSelectNote}
+        recentNotes={recentNotes}
+      />
     </div>
   );
 }
