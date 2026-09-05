@@ -1,3 +1,6 @@
+import { useTheme } from "@app/ThemeContext";
+import { lightEditorTheme, darkEditorTheme } from "@lib/blocknoteTheme";
+
 import { useCallback, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCreateBlockNote } from "@blocknote/react";
@@ -22,6 +25,8 @@ const SAVE_DEBOUNCE_MS = 800;
 export function NoteEditor({ noteId, initialContent }: Props) {
   const queryClient = useQueryClient();
   const updateNote = useUpdateNote(noteId);
+  //theme
+  const { theme } = useTheme();
 
   const editor = useCreateBlockNote({
     initialContent: initialContent && initialContent.length > 0 ? initialContent : undefined,
@@ -68,7 +73,11 @@ export function NoteEditor({ noteId, initialContent }: Props) {
 
   return (
     <div className="flex-1 overflow-y-auto px-8 py-6">
-      <BlockNoteView editor={editor} theme="light" onChange={scheduleSave} />
+      <BlockNoteView
+        editor={editor}
+        theme={theme === "dark" ? darkEditorTheme : lightEditorTheme}
+        onChange={scheduleSave}
+      />
     </div>
   );
 }

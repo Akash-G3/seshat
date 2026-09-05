@@ -40,7 +40,7 @@ export function WorkspaceHeader({ workspaceName, onNewNotebook, onNewNote }: Pro
               setIsRenaming(false);
             }
           }}
-          className="flex-1 min-w-0 text-sm font-semibold bg-bg border border-accent rounded-sm px-1 outline-none"
+          className="flex-1 min-w-0 text-sm font-semibold bg-bg text-text-primary border border-accent rounded-sm px-1 outline-none"
         />
       ) : (
         <span

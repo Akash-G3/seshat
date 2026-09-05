@@ -17,7 +17,7 @@ export function NoteEditorPane({ noteId }: Props) {
   }
 
   return (
-    <NoteEditor
+    <NoteEditor 
       key={note.id}
       noteId={note.id}
       initialContent={note.document.content as unknown as Block[] | undefined}

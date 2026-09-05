@@ -1,1 +1,70 @@
+/* index.css
 @import "tailwindcss";
+
+@theme {
+  --color-bg: #ffffff;
+  --color-bg-subtle: #fafafa;
+  --color-bg-hover: #f1f1f2;
+  --color-border: #e4e4e7;
+
+  --color-text-primary: #18181b;
+  --color-text-secondary: #71717a;
+  --color-text-muted: #a1a1aa;
+
+  --color-accent: #0e7490;
+  --color-accent-subtle: #ecfeff;
+
+  --color-danger: #dc2626;
+  --color-danger-subtle: #fef2f2;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+
+  --font-sans: Inter, system-ui, sans-serif;
+} */
+
+/* //improved version with dark theme support  */
+
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-bg: #F7F6F3;
+  --color-bg-subtle: #EFEDE7;
+  --color-bg-hover: #E7E4DC;
+  --color-border: #DEDAD0;
+
+  --color-text-primary: #2B2926;
+  --color-text-secondary: #6E695F;
+  --color-text-muted: #A19C8F;
+
+  --color-accent: #3D6B63;
+  --color-accent-subtle: #E4EBE8;
+
+  --color-danger: #B0503F;
+  --color-danger-subtle: #F5E9E6;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --row-height: 32px;
+
+  --font-sans: Inter, system-ui, sans-serif;
+}
+
+.dark {
+  --color-bg: #1E1C1A;
+  --color-bg-subtle: #262320;
+  --color-bg-hover: #2E2A26;
+  --color-border: #3A362F;
+
+  --color-text-primary: #EDEAE4;
+  --color-text-secondary: #A8A296;
+  --color-text-muted: #746F63;
+
+  --color-accent: #5C9188;
+  --color-accent-subtle: #24322E;
+
+  --color-danger: #D97B65;
+  --color-danger-subtle: #3A2620;
+}

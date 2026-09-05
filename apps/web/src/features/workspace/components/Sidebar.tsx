@@ -6,6 +6,7 @@ import { SidebarNotebookItem } from "./SidebarNotebookItem";
 import { SidebarNoteItem } from "./SidebarNoteItem";
 import { WorkspaceHeader } from "./WorkspaceHeader";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { SidebarProfile } from "./SidebarProfile";
 
 interface SidebarProps {
   activeNoteId?: string;
@@ -138,6 +139,9 @@ export function Sidebar({ activeNoteId, onSelectNote }: SidebarProps) {
           </div>
         )}
       </div>
+
+{/* // Sidebar Profile  */}
+      <SidebarProfile />
 
       <ConfirmDialog
         open={!!deleteTarget}
