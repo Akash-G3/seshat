@@ -76,7 +76,7 @@ export function Sidebar({
 
   return (
     <aside className="w-full flex-1 min-h-0 bg-bg-subtle flex flex-col overflow-hidden">
-      <div className="flex-1 overflow-y-auto px-2 py-2">
+      <div className="flex-1 overflow-y-auto scrollbar-none px-2 py-2">
         {tree.notebooks.map((notebook) => (
           <SidebarNotebookItem
             key={notebook.id}

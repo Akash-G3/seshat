@@ -123,7 +123,7 @@ export function Workspace() {
         />
       </div>
 
-      <div className="flex flex-col flex-1 min-w-0">
+      <div className="flex flex-col flex-1 min-w-0 min-h-0">
         <TopBarMain
           breadcrumbs={breadcrumbs}
           onBreadcrumbClick={(seg) => {
@@ -141,7 +141,7 @@ export function Workspace() {
           onBack={back}
           onForward={forward}
         />
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-hidden">
           {activeNoteId ? (
             <NoteEditorPane noteId={activeNoteId} />
           ) : (

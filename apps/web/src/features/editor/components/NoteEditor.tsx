@@ -10,6 +10,7 @@ import "@blocknote/mantine/style.css";
 import { useUpdateNote } from "@features/workspace/hooks/useNoteMutations";
 import type { Note } from "@features/workspace/types/workspace.types";
 
+
 interface Props {
   noteId: string;
   // Whatever was last persisted in the note's `content` JSONB column.
@@ -72,7 +73,7 @@ export function NoteEditor({ noteId, initialContent }: Props) {
   }, [noteId]);
 
   return (
-    <div className="flex-1 overflow-y-auto px-8 py-6">
+    <div className="h-full min-h-0 overflow-y-auto scrollbar-none px-8 py-6">
       <BlockNoteView
         editor={editor}
         theme={theme === "dark" ? darkEditorTheme : lightEditorTheme}

@@ -68,3 +68,13 @@
   --color-danger: #D97B65;
   --color-danger-subtle: #3A2620;
 }
+
+@layer utilities {
+  .scrollbar-none {
+    scrollbar-width: none;       /* Firefox */
+    -ms-overflow-style: none;    /* IE/Edge legacy */
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;               /* Chrome, Safari, Edge Chromium */
+  }
+}
