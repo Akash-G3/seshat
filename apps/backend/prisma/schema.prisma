@@ -70,14 +70,20 @@ model Workspace {
 }
 
 model Notebook {
-  id          String    @id @default(cuid())
+  id          String     @id @default(cuid())
   title       String
   ownerId     String
   workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  parentId    String?
+  parent      Notebook?  @relation("NotebookHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Notebook[] @relation("NotebookHierarchy")
   notes       Note[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([workspaceId])
+  @@index([parentId])
 }
 
 model Document {
