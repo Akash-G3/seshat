@@ -9,17 +9,21 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  name          String
-  email         String   @unique
-  password      String
-  isVerified    Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  password   String
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  refreshTokens         RefreshToken[]
+  refreshTokens           RefreshToken[]
   emailVerificationTokens EmailVerificationToken[]
-  passwordResetTokens    PasswordResetToken[]
+  passwordResetTokens     PasswordResetToken[]
+
+  tags       Tag[]
+  favourites Favourite[]
+  shareLinks ShareLink[]
 
   @@map("users")
 }
@@ -65,6 +69,7 @@ model Workspace {
   ownerId   String     @unique // one workspace per user for now
   notebooks Notebook[]
   notes     Note[]
+  tags      Tag[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 }
@@ -82,16 +87,25 @@ model Notebook {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
+  deletedAt     DateTime?
+  deleteBatchId String?
+
+  favourites Favourite[]
+  shareLinks ShareLink[]
+
   @@index([workspaceId])
   @@index([parentId])
+  @@index([ownerId, workspaceId, deletedAt])
+  @@index([ownerId, parentId, deletedAt])
 }
 
 model Document {
-  id        String   @id @default(cuid())
-  content   Json     @default("{}")
-  ownerId   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  content    Json     @default("{}")
+  searchText String   @default("")
+  ownerId    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   note Note?
 }
@@ -108,4 +122,72 @@ model Note {
   title       String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  deletedAt     DateTime?
+  deleteBatchId String?
+
+  tags       NoteTag[]
+  favourites Favourite[]
+  shareLinks ShareLink[]
+
+  @@index([ownerId, deletedAt, updatedAt])
+  @@index([ownerId, workspaceId, deletedAt])
+  @@index([ownerId, notebookId, deletedAt])
+}
+
+model Tag {
+  id          String    @id @default(cuid())
+  ownerId     String
+  workspaceId String
+  name        String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  notes       NoteTag[]
+
+  owner     User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId, workspaceId])
+}
+
+model NoteTag {
+  noteId    String
+  tagId     String
+  createdAt DateTime @default(now())
+  note      Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([noteId, tagId])
+  @@index([tagId, noteId])
+}
+
+model Favourite {
+  id         String    @id @default(cuid())
+  ownerId    String
+  noteId     String?
+  notebookId String?
+  createdAt  DateTime  @default(now())
+  owner      User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  note       Note?     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  notebook   Notebook? @relation(fields: [notebookId], references: [id], onDelete: Cascade)
+
+  @@unique([ownerId, noteId], name: "ownerId_noteId")
+  @@unique([ownerId, notebookId], name: "ownerId_notebookId")
+  @@index([ownerId, createdAt])
+}
+
+model ShareLink {
+  id         String    @id @default(cuid())
+  ownerId    String
+  tokenHash  String    @unique
+  noteId     String?
+  notebookId String?
+  expiresAt  DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  owner      User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  note       Note?     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  notebook   Notebook? @relation(fields: [notebookId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId, revokedAt])
 }

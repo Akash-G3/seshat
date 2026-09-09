@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { prisma } from '../../config/prisma';
 import { documentService } from '../document/document.service';
 import { CreateNoteInput, UpdateNoteInput } from './note.types';
@@ -12,7 +13,7 @@ export const noteService = {
 
   findAllByOwner: (ownerId: string) =>
     prisma.note.findMany({
-      where: { ownerId },
+      where: { ownerId, deletedAt: null },
       select: {
         id: true,
         title: true,
@@ -26,12 +27,12 @@ export const noteService = {
 
   findById: (id: string, ownerId: string) =>
     prisma.note.findFirst({
-      where: { id, ownerId },
+      where: { id, ownerId, deletedAt: null },
       include: { document: { select: { content: true } } },
     }),
 
   update: async (id: string, ownerId: string, { title, content, notebookId }: UpdateNoteInput) => {
-    const note = await prisma.note.findFirst({ where: { id, ownerId } });
+    const note = await prisma.note.findFirst({ where: { id, ownerId, deletedAt: null } });
     if (!note) return null;
 
     if (content !== undefined) {
@@ -49,5 +50,10 @@ export const noteService = {
     return noteService.findById(id, ownerId);
   },
 
-  remove: (id: string, ownerId: string) => prisma.note.deleteMany({ where: { id, ownerId } }),
+  // DELETE now means "move to trash" — permanent deletion lives in /api/trash.
+  remove: (id: string, ownerId: string) =>
+    prisma.note.updateMany({
+      where: { id, ownerId, deletedAt: null },
+      data: { deletedAt: new Date(), deleteBatchId: crypto.randomUUID() },
+    }),
 };

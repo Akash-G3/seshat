@@ -1,42 +1,4 @@
-// import { prisma } from '../../config/prisma';
-
-// export const notebookService = {
-//   create: (ownerId: string, workspaceId: string, title: string) =>
-//     prisma.notebook.create({ data: { ownerId, workspaceId, title } }),
-
-//   findAllByWorkspace: (ownerId: string, workspaceId: string) =>
-//     prisma.notebook.findMany({
-//       where: { ownerId, workspaceId },
-//       orderBy: { updatedAt: 'desc' },
-//     }),
-
-//   rename: async (id: string, ownerId: string, title: string) => {
-//     const result = await prisma.notebook.updateMany({
-//       where: { id, ownerId },
-//       data: { title },
-//     });
-//     if (result.count === 0) return null; // not found, or not owned by this user
-//     return prisma.notebook.findUnique({ where: { id } });
-//   },
-
-//   remove: async (id: string, ownerId: string) => {
-//     // Wrapped in a transaction: if either step fails, both roll back —
-//     // we never want a state where notes got orphaned but the notebook still exists, or vice versa.
-//     return prisma.$transaction(async (tx) => {
-//       // 1. Move this notebook's notes to unfiled (clear notebookId).
-//       await tx.note.updateMany({
-//         where: { notebookId: id, ownerId },
-//         data: { notebookId: null },
-//       });
-
-//       // 2. Now delete the notebook itself.
-//       const result = await tx.notebook.deleteMany({ where: { id, ownerId } });
-
-//       return result.count > 0;
-//     });
-//   },
-// };
-
+import crypto from 'node:crypto';
 import { prisma } from '../../config/prisma';
 
 export class DuplicateNotebookTitleError extends Error {
@@ -63,6 +25,7 @@ export const notebookService = {
         ownerId,
         workspaceId,
         parentId,
+        deletedAt: null,
         title: { equals: title, mode: 'insensitive' },
       },
     });
@@ -70,7 +33,7 @@ export const notebookService = {
 
     if (parentId) {
       const parent = await prisma.notebook.findFirst({
-        where: { id: parentId, ownerId, workspaceId },
+        where: { id: parentId, ownerId, workspaceId, deletedAt: null },
       });
       if (!parent) throw new Error('Parent notebook not found');
     }
@@ -78,10 +41,10 @@ export const notebookService = {
     return prisma.notebook.create({ data: { ownerId, workspaceId, title, parentId } });
   },
 
-  // Flat list (unchanged) — still useful for simple views / search.
+  // Flat list — still useful for simple views / search. Excludes trashed notebooks.
   findAllByWorkspace: (ownerId: string, workspaceId: string) =>
     prisma.notebook.findMany({
-      where: { ownerId, workspaceId },
+      where: { ownerId, workspaceId, deletedAt: null },
       orderBy: { updatedAt: 'desc' },
     }),
 
@@ -89,7 +52,7 @@ export const notebookService = {
   // One query for the whole workspace; fine at this scale, avoids N+1 recursion.
   findTreeByWorkspace: async (ownerId: string, workspaceId: string) => {
     const notebooks = await prisma.notebook.findMany({
-      where: { ownerId, workspaceId },
+      where: { ownerId, workspaceId, deletedAt: null },
       orderBy: { updatedAt: 'desc' },
     });
 
@@ -110,7 +73,7 @@ export const notebookService = {
   },
 
   rename: async (id: string, ownerId: string, title: string) => {
-    const notebook = await prisma.notebook.findFirst({ where: { id, ownerId } });
+    const notebook = await prisma.notebook.findFirst({ where: { id, ownerId, deletedAt: null } });
     if (!notebook) return null;
 
     const duplicate = await prisma.notebook.findFirst({
@@ -119,6 +82,7 @@ export const notebookService = {
         ownerId,
         workspaceId: notebook.workspaceId,
         parentId: notebook.parentId,
+        deletedAt: null,
         title: { equals: title, mode: 'insensitive' },
       },
     });
@@ -129,14 +93,14 @@ export const notebookService = {
 
   // Move a notebook under a new parent (or to the workspace root if newParentId is null).
   move: async (id: string, ownerId: string, newParentId: string | null) => {
-    const notebook = await prisma.notebook.findFirst({ where: { id, ownerId } });
+    const notebook = await prisma.notebook.findFirst({ where: { id, ownerId, deletedAt: null } });
     if (!notebook) return null;
 
     if (newParentId) {
       if (newParentId === id) throw new Error('A notebook cannot be its own parent');
 
       const newParent = await prisma.notebook.findFirst({
-        where: { id: newParentId, ownerId, workspaceId: notebook.workspaceId },
+        where: { id: newParentId, ownerId, workspaceId: notebook.workspaceId, deletedAt: null },
       });
       if (!newParent) throw new Error('Target parent notebook not found');
 
@@ -159,6 +123,7 @@ export const notebookService = {
         ownerId,
         workspaceId: notebook.workspaceId,
         parentId: newParentId,
+        deletedAt: null,
         title: { equals: notebook.title, mode: 'insensitive' },
       },
     });
@@ -167,29 +132,42 @@ export const notebookService = {
     return prisma.notebook.update({ where: { id }, data: { parentId: newParentId } });
   },
 
+  // DELETE now means "move to trash" (whole subtree), not "promote children and delete".
+  // Permanent deletion lives in /api/trash. One deleteBatchId is stamped across the
+  // notebook subtree plus its currently-active notes, so a later restore only revives
+  // exactly what this delete touched — notes trashed earlier, separately, are untouched.
   remove: async (id: string, ownerId: string) => {
-    // Wrapped in a transaction: if any step fails, everything rolls back.
-    return prisma.$transaction(async (tx) => {
-      const notebook = await tx.notebook.findFirst({ where: { id, ownerId } });
-      if (!notebook) return false;
+    const root = await prisma.notebook.findFirst({ where: { id, ownerId, deletedAt: null } });
+    if (!root) return false;
 
-      // 1. Promote this notebook's children up one level (to its own parent),
-      //    mirroring how notes get "unfiled" rather than deleted.
-      await tx.notebook.updateMany({
-        where: { parentId: id, ownerId },
-        data: { parentId: notebook.parentId },
-      });
-
-      // 2. Move this notebook's notes to unfiled (clear notebookId).
-      await tx.note.updateMany({
-        where: { notebookId: id, ownerId },
-        data: { notebookId: null },
-      });
-
-      // 3. Now delete the notebook itself.
-      const result = await tx.notebook.deleteMany({ where: { id, ownerId } });
-
-      return result.count > 0;
+    const all = await prisma.notebook.findMany({
+      where: { ownerId, workspaceId: root.workspaceId, deletedAt: null },
+      select: { id: true, parentId: true },
     });
+    const ids = new Set<string>([id]);
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const row of all) {
+        if (row.parentId && ids.has(row.parentId) && !ids.has(row.id)) {
+          ids.add(row.id);
+          changed = true;
+        }
+      }
+    }
+
+    const deletedAt = new Date();
+    const deleteBatchId = crypto.randomUUID();
+    await prisma.$transaction([
+      prisma.notebook.updateMany({
+        where: { id: { in: [...ids] }, ownerId },
+        data: { deletedAt, deleteBatchId },
+      }),
+      prisma.note.updateMany({
+        where: { notebookId: { in: [...ids] }, ownerId, deletedAt: null },
+        data: { deletedAt, deleteBatchId },
+      }),
+    ]);
+    return true;
   },
 };

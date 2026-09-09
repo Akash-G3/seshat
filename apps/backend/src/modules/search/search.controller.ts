@@ -11,9 +11,15 @@ type SearchRequest = AuthenticatedRequest & RequestWithValidatedQuery<SearchQuer
 export const searchController = {
   search: async (req: SearchRequest, res: Response, next: NextFunction) => {
     try {
-      const { q } = req.validatedQuery;
-      const results = await searchService.search(req.userId!, q);
-      res.json({ success: true, data: results });
+      const { q, workspaceId, type, favouritesOnly, limit, offset } = req.validatedQuery;
+      const results = await searchService.search(req.userId!, q, {
+        workspaceId,
+        type,
+        favouritesOnly,
+        limit,
+        offset,
+      });
+      res.json({ success: true, data: results, meta: { limit, offset } });
     } catch (err) {
       next(err);
     }
