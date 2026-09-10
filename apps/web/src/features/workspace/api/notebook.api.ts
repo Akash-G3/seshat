@@ -6,8 +6,8 @@ export async function getNotebooks(workspaceId: string): Promise<Notebook[]> {
   return response.data.data;
 }
 
-export async function createNotebook(workspaceId: string, title: string): Promise<Notebook> {
-  const response = await apiClient.post("/notebooks", { workspaceId, title });
+export async function createNotebook(workspaceId: string, title: string, parentId: string | null = null): Promise<Notebook> {
+  const response = await apiClient.post("/notebooks", { workspaceId, title, parentId });
   return response.data.data;
 }
 

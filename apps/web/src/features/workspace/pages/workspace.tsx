@@ -1,161 +1,200 @@
-
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Sidebar } from "../components/Sidebar";
+import { useCallback, useEffect, useState } from "react";
 import { NoteEditorPane } from "@features/editor/pages/NoteEditorPane";
-import { useWorkspaceTree } from "../hooks/useWorkspaceTree";
-import { TopBarLeft } from "../../topbar/components/TopBarLeft";
-import { TopBarMain } from "../../topbar/components/TopBarMain";
-import { useTabs } from "../../topbar/hooks/useTabs";
-import { useNavigationHistory } from "../../topbar/hooks/useNavigationHistory";
-import type { BreadcrumbSegment } from "../../topbar/types";
-import { SIDEBAR_WIDTH } from "../constants";
 import { QuickSwitcher } from "@features/search/QuickSwitcher";
 import { useRecentNotes } from "@features/search/useRecentNotes";
+import { ConfirmDialog } from "@components/ui/ConfirmDialog";
+import { ActivityBar } from "@features/activityBar";
+import { WorkspaceHeader, useTabs } from "@features/workspaceHeader";
+import { Library } from "@features/library";
+import { WorkspaceShell } from "../components/WorkspaceShell";
+import { useWorkspaceTree } from "../hooks/useWorkspaceTree";
+import { useCreateNote, useDeleteNote, useUpdateNote } from "../hooks/useNoteMutations";
+import { useCreateNotebook, useDeleteNotebook, useRenameNotebook } from "../hooks/useNotebookMutations";
+import { useRenameWorkspace } from "../hooks/useWorkspaceMutations";
+
+interface PendingDelete {
+  type: "note" | "notebook";
+  id: string;
+  label: string;
+}
+
+interface CreateDialogProps {
+  open: boolean;
+  title: string;
+  placeholder: string;
+  onSubmit: (value: string) => void;
+  onCancel: () => void;
+}
+
+function CreateDialog({ open, title, placeholder, onSubmit, onCancel }: CreateDialogProps) {
+  const [value, setValue] = useState("");
+  useEffect(() => { if (open) setValue(""); }, [open]);
+  if (!open) return null;
+
+  function submit() {
+    const next = value.trim();
+    if (next) onSubmit(next);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20" onMouseDown={onCancel}>
+      <div className="w-80 rounded-md border border-border bg-bg p-5 shadow-lg" onMouseDown={(e) => e.stopPropagation()}>
+        <h2 className="mb-3 text-sm font-semibold text-text-primary">{title}</h2>
+        <input autoFocus value={value} onChange={(e) => setValue(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") submit(); if (e.key === "Escape") onCancel(); }} placeholder={placeholder} className="h-9 w-full rounded-sm border border-border bg-bg px-2 text-sm text-text-primary outline-none focus:border-accent" />
+        <div className="mt-4 flex justify-end gap-2">
+          <button type="button" onClick={onCancel} className="rounded-sm px-3 py-1.5 text-sm text-text-secondary hover:bg-bg-hover">Cancel</button>
+          <button type="button" onClick={submit} className="rounded-sm bg-accent px-3 py-1.5 text-sm text-white hover:opacity-90">Create</button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function Workspace() {
-  const [activeNoteId, setActiveNoteId] = useState<string | undefined>();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isCreatingNotebook, setIsCreatingNotebook] = useState(false);
-  const [isCreatingNote, setIsCreatingNote] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const { workspace, tree } = useWorkspaceTree();
+  const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
+  const [libraryOpen, setLibraryOpen] = useState(true);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [createNoteOpen, setCreateNoteOpen] = useState(false);
+  const [createNotebookOpen, setCreateNotebookOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
 
-  const { tabs, activeTabId, setActiveTabId, openTab, closeTab, syncTitles } = useTabs();
+  const { workspace, tree, isLoading, isError } = useWorkspaceTree();
+  const { tabs, activeTabId, openTab, closeTab, syncTitles } = useTabs();
   const { recent: recentNotes, addRecent } = useRecentNotes();
 
-  const findNote = useCallback(
-    (noteId: string) => {
-      if (!tree) return undefined;
-      for (const nb of tree.notebooks) {
-        const note = nb.notes.find((n) => n.id === noteId);
-        if (note) return { title: note.title, notebookId: nb.id };
-      }
-      const unfiled = tree.unfiledNotes.find((n) => n.id === noteId);
-      return unfiled ? { title: unfiled.title, notebookId: null } : undefined;
-    },
-    [tree]
-  );
+  const workspaceId = workspace?.id;
+  const createNote = useCreateNote(workspaceId ?? "");
+  const createNotebook = useCreateNotebook(workspaceId ?? "");
+  const renameNotebook = useRenameNotebook(workspaceId ?? "");
+  const deleteNotebook = useDeleteNotebook(workspaceId ?? "");
+  const updateNote = useUpdateNote(activeNoteId ?? "");
+  const deleteNote = useDeleteNote();
+  const renameWorkspace = useRenameWorkspace();
 
-  const goToNote = useCallback((noteId: string) => {
+  const findNote = useCallback((noteId: string) => {
+    if (!tree) return undefined;
+
+    function search(notebooks: typeof tree.notebooks): { title: string; notebookId: string } | undefined {
+      for (const notebook of notebooks) {
+        const note = notebook.notes.find((item) => item.id === noteId);
+        if (note) return { title: note.title, notebookId: notebook.id };
+
+        const nested = search(notebook.children);
+        if (nested) return nested;
+      }
+      return undefined;
+    }
+
+    const nested = search(tree.notebooks);
+    if (nested) return nested;
+
+    const note = tree.unfiledNotes.find((item) => item.id === noteId);
+    return note ? { title: note.title, notebookId: null } : undefined;
+  }, [tree]);
+
+  const selectNote = useCallback((noteId: string) => {
+    const info = findNote(noteId);
+    const title = info?.title || "Untitled";
+    openTab({ noteId, title, notebookId: info?.notebookId ?? null });
     setActiveNoteId(noteId);
-    setActiveTabId(noteId);
-  }, [setActiveTabId]);
+    addRecent({ id: noteId, title });
+  }, [findNote, openTab, addRecent]);
 
-  const { push, back, forward, canGoBack, canGoForward } = useNavigationHistory(goToNote);
-
-  const handleSelectNote = useCallback(
-    (noteId: string) => {
-      const info = findNote(noteId);
-      const title = info?.title ?? "Untitled";
-      openTab({ noteId, title, notebookId: info?.notebookId ?? null });
-      goToNote(noteId);
-      push(noteId);
-      addRecent({ id: noteId, title });
-    },
-    [findNote, openTab, goToNote, push, addRecent]
-  );
-
-  const handleCloseTab = useCallback(
-    (noteId: string) => {
-      closeTab(noteId);
-      if (activeNoteId === noteId) {
-        const remaining = tabs.filter((t) => t.noteId !== noteId);
-        setActiveNoteId(remaining[remaining.length - 1]?.noteId);
-      }
-    },
-    [closeTab, activeNoteId, tabs]
-  );
+  const closeNoteTab = useCallback((noteId: string) => {
+    const index = tabs.findIndex((tab) => tab.noteId === noteId);
+    const next = tabs.filter((tab) => tab.noteId !== noteId);
+    closeTab(noteId);
+    if (activeNoteId === noteId) setActiveNoteId(next[index]?.noteId ?? next[index - 1]?.noteId ?? null);
+  }, [tabs, closeTab, activeNoteId]);
 
   useEffect(() => {
     if (!tree) return;
-    const titleById = new Map<string, string>();
-    tree.notebooks.forEach((nb) => nb.notes.forEach((n) => titleById.set(n.id, n.title)));
-    tree.unfiledNotes.forEach((n) => titleById.set(n.id, n.title));
-    syncTitles(titleById);
+    const titles = new Map<string, string>();
+    function collect(notebooks: typeof tree.notebooks) {
+      notebooks.forEach((nb) => {
+        nb.notes.forEach((note) => titles.set(note.id, note.title));
+        collect(nb.children);
+      });
+    }
+    collect(tree.notebooks);
+    tree.unfiledNotes.forEach((note) => titles.set(note.id, note.title));
+    syncTitles(titles);
   }, [tree, syncTitles]);
 
   useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        setIsSearchOpen(true);
+    function onKeyDown(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setSearchOpen(true);
       }
     }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  const breadcrumbs: BreadcrumbSegment[] = useMemo(() => {
-    if (!tree || !workspace || !activeNoteId) return [];
-    const segments: BreadcrumbSegment[] = [{ id: workspace.id, label: workspace.name, type: "workspace" }];
+  function createNewNote(notebookId: string | null, title: string) {
+    if (!workspaceId) return;
+    createNote.mutate({ notebookId, title }, {
+      onSuccess: (note) => selectNote(note.id),
+    });
+    setCreateNoteOpen(false);
+  }
 
-    for (const nb of tree.notebooks) {
-      const note = nb.notes.find((n) => n.id === activeNoteId);
-      if (note) {
-        segments.push({ id: nb.id, label: nb.title, type: "notebook" });
-        segments.push({ id: note.id, label: note.title, type: "note" });
-        return segments;
-      }
+  function createNewNotebook(title: string, parentId: string | null = null) {
+    if (!workspaceId) return;
+    createNotebook.mutate({ title, parentId });
+    setCreateNotebookOpen(false);
+  }
+
+  function confirmDelete() {
+    if (!pendingDelete) return;
+    if (pendingDelete.type === "note") {
+      deleteNote.mutate(pendingDelete.id, {
+        onSuccess: () => { if (activeNoteId === pendingDelete.id) { closeTab(pendingDelete.id); setActiveNoteId(null); } },
+      });
+    } else {
+      deleteNotebook.mutate(pendingDelete.id);
     }
-    const unfiled = tree.unfiledNotes.find((n) => n.id === activeNoteId);
-    if (unfiled) segments.push({ id: unfiled.id, label: unfiled.title, type: "note" });
-    return segments;
-  }, [tree, workspace, activeNoteId]);
+    setPendingDelete(null);
+  }
+
+  if (isLoading) return <div className="flex h-screen items-center justify-center bg-bg text-sm text-text-muted">Loading workspace…</div>;
+  if (isError || !workspace || !tree) return <div className="flex h-screen items-center justify-center bg-bg text-sm text-danger">Couldn't load workspace</div>;
 
   return (
-    <div className="flex h-screen bg-bg">
-      <div
-        className="flex flex-col shrink-0 border-r border-border overflow-hidden"
-        style={{ width: sidebarCollapsed ? 0 : SIDEBAR_WIDTH }}
-      >
-        <TopBarLeft
-          workspaceName={workspace?.name ?? ""}
-          onNewNotebook={() => setIsCreatingNotebook(true)}
-          onNewNote={() => setIsCreatingNote(true)}
-        />
-        <Sidebar
-          activeNoteId={activeNoteId}
-          onSelectNote={handleSelectNote}
-          isCreatingNotebook={isCreatingNotebook}
-          setIsCreatingNotebook={setIsCreatingNotebook}
-          isCreatingNote={isCreatingNote}
-          setIsCreatingNote={setIsCreatingNote}
-        />
-      </div>
-
-      <div className="flex flex-col flex-1 min-w-0 min-h-0">
-        <TopBarMain
-          breadcrumbs={breadcrumbs}
-          onBreadcrumbClick={(seg) => {
-            if (seg.type === "note") handleSelectNote(seg.id);
-          }}
-          sidebarCollapsed={sidebarCollapsed}
-          onToggleSidebar={() => setSidebarCollapsed((c) => !c)}
-          onOpenSearch={() => setIsSearchOpen(true)}
-          tabs={tabs}
-          activeTabId={activeTabId}
-          onSelectTab={handleSelectNote}
-          onCloseTab={handleCloseTab}
-          canGoBack={canGoBack}
-          canGoForward={canGoForward}
-          onBack={back}
-          onForward={forward}
-        />
-        <div className="flex-1 min-h-0 overflow-hidden">
-          {activeNoteId ? (
-            <NoteEditorPane noteId={activeNoteId} />
-          ) : (
-            <main className="h-full bg-bg p-8 text-text-muted">Select a note</main>
-          )}
-        </div>
-      </div>
-
-      <QuickSwitcher
-        open={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-        onSelectNote={handleSelectNote}
-        recentNotes={recentNotes}
+    <>
+      <WorkspaceShell
+        activityBar={
+          <ActivityBar
+            libraryOpen={libraryOpen}
+            onCreateNote={() => setCreateNoteOpen(true)}
+            onCreateNotebook={() => setCreateNotebookOpen(true)}
+            onSearch={() => setSearchOpen(true)}
+            onFavourites={() => { /* Placeholder until favourites backend/UI is implemented. */ }}
+            onToggleLibrary={() => setLibraryOpen((value) => !value)}
+          />
+        }
+        library={libraryOpen ? <Library tree={tree} activeNoteId={activeNoteId} onSelectNote={selectNote} onCreateNote={createNewNote} onCreateNotebook={(parentId, title) => createNewNotebook(title, parentId)} onRenameNote={(id, title) => updateNote.mutate({ title })} onDeleteNote={(id) => { const note = findNote(id); setPendingDelete({ type: "note", id, label: note?.title || "Untitled" }); }} onRenameNotebook={(id, title) => renameNotebook.mutate({ id, title })} onDeleteNotebook={(id) => { const notebook = tree.notebooks.find((item) => item.id === id); setPendingDelete({ type: "notebook", id, label: notebook?.title || "Notebook" }); }} /> : undefined}
+        header={
+          <WorkspaceHeader
+            workspaceName={workspace.name}
+            tabs={tabs}
+            activeTabId={activeTabId}
+            onToggleLibrary={() => setLibraryOpen((value) => !value)}
+            onRenameWorkspace={(name) => renameWorkspace.mutate(name)}
+            onSelectTab={selectNote}
+            onCloseTab={closeNoteTab}
+          />
+        }
+        content={activeNoteId ? <NoteEditorPane noteId={activeNoteId} /> : <div className="flex h-full items-center justify-center text-sm text-text-muted">Select a note to start writing.</div>}
       />
-    </div>
+
+      <QuickSwitcher open={searchOpen} onClose={() => setSearchOpen(false)} onSelectNote={selectNote} recentNotes={recentNotes} />
+
+      <CreateDialog open={createNoteOpen} title="Create note" placeholder="Note title" onSubmit={(title) => createNewNote(null, title)} onCancel={() => setCreateNoteOpen(false)} />
+      <CreateDialog open={createNotebookOpen} title="Create notebook" placeholder="Notebook name" onSubmit={createNewNotebook} onCancel={() => setCreateNotebookOpen(false)} />
+
+      <ConfirmDialog open={!!pendingDelete} title={`Delete ${pendingDelete?.type === "notebook" ? "notebook" : "note"}?`} message={`“${pendingDelete?.label ?? ""}” will be deleted.`} onConfirm={confirmDelete} onCancel={() => setPendingDelete(null)} />
+    </>
   );
 }

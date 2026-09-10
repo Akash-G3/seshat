@@ -7,7 +7,8 @@ import { createNotebook, renameNotebook, deleteNotebook } from "../api/notebook.
 export function useCreateNotebook(workspaceId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (title: string) => createNotebook(workspaceId, title),
+    mutationFn: ({ title, parentId }: { title: string; parentId: string | null }) =>
+      createNotebook(workspaceId, title, parentId),
     // Create needs a real server-generated ID before it's usable (clickable, routable),
     // so we don't fake an optimistic entry — just refetch once the real one exists.
     onSuccess: () => {

@@ -32,12 +32,36 @@ export function useWorkspaceTree() {
   let tree: WorkspaceTree | undefined;
   if (notebooksQuery.data && notesQuery.data) {
     const notes = notesQuery.data;
+    const notebooks = notebooksQuery.data;
+
+    // The API returns notebooks as a flat collection with parentId.
+    // Build the visual tree here so Library stays a pure rendering component.
+    const nodes = new Map(
+      notebooks.map((notebook) => [
+        notebook.id,
+        {
+          ...notebook,
+          notes: notes.filter((note) => note.notebookId === notebook.id),
+          children: [],
+        },
+      ]),
+    );
+
+    const roots = [];
+    for (const notebook of notebooks) {
+      const node = nodes.get(notebook.id)!;
+      if (notebook.parentId) {
+        const parent = nodes.get(notebook.parentId);
+        if (parent) parent.children.push(node);
+        else roots.push(node); // Defensive fallback for stale/orphaned data.
+      } else {
+        roots.push(node);
+      }
+    }
+
     tree = {
-      notebooks: notebooksQuery.data.map((nb) => ({
-        ...nb,
-        notes: notes.filter((n) => n.notebookId === nb.id),
-      })),
-      unfiledNotes: notes.filter((n) => n.notebookId === null),
+      notebooks: roots,
+      unfiledNotes: notes.filter((note) => note.notebookId === null),
     };
   }
 

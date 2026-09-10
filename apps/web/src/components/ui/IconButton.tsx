@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import type { ButtonHTMLAttributes } from "react";
 
 // A small square button for icon-only actions (rename, delete, add).
-// Only visible on row hover in most places we use it — see SidebarNotebookItem.
+// Consumers can hide this button on hover when an action should stay visually quiet.
 interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "default" | "danger";
 }

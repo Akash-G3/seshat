@@ -12,8 +12,9 @@ export interface NoteSummary {
 
 export interface Notebook {
   id: string;
-  title: string;   // was `name` — wrong
+  title: string;
   workspaceId: string;
+  parentId: string | null;
 }
 
 export interface Note extends NoteSummary {
@@ -22,7 +23,12 @@ export interface Note extends NoteSummary {
 }
 
 // Client-side assembled shape — not what any single endpoint returns
+export interface NotebookNode extends Notebook {
+  notes: NoteSummary[];
+  children: NotebookNode[];
+}
+
 export interface WorkspaceTree {
-  notebooks: (Notebook & { notes: NoteSummary[] })[];
+  notebooks: NotebookNode[];
   unfiledNotes: NoteSummary[];
 }
