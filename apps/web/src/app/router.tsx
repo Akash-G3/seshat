@@ -5,9 +5,11 @@ import { LoginForm } from "@features/auth/LoginForm";
 import { SignupForm } from "@features/auth/SignupForm";
 import { Workspace } from "@/features/workspace/pages/workspace";
 import { Home } from "@features/home/Home";
+import { PublicSharePage } from "@features/share/pages/PublicSharePage";
 
 export const router = createBrowserRouter([
   { path: "/", element: <Home /> },
+  { path: "/share/:token", element: <PublicSharePage /> },
   {
     element: <PublicOnlyRoute />,
     children: [

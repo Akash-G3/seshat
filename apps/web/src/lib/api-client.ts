@@ -58,7 +58,7 @@ apiClient.interceptors.response.use(
       // AuthContext catching the initial getMyWorkspace() call)
       // already handles that by setting workspace to null, no
       // reload needed.
-      const isOnPublicPath = PUBLIC_PATHS.includes(window.location.pathname);
+      const isOnPublicPath = PUBLIC_PATHS.includes(window.location.pathname) || window.location.pathname.startsWith("/share/");
       if (!isOnPublicPath) {
         window.location.href = "/login";
       }

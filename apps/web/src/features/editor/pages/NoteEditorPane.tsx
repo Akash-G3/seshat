@@ -1,12 +1,18 @@
 import type { Block } from "@blocknote/core";
 import { useNote } from "../hooks/useNote";
 import { NoteEditor } from "../components/NoteEditor";
+import { TagPicker } from "@features/tags/components/TagPicker/TagPicker";
+import { NoteActions } from "../components/NoteActions/NoteActions";
 
 interface Props {
   noteId: string;
+  workspaceId: string;
+  onShare: () => void;
+  onCopy: () => void;
+  onExport: () => void;
 }
 
-export function NoteEditorPane({ noteId }: Props) {
+export function NoteEditorPane({ noteId, workspaceId, onShare, onCopy, onExport }: Props) {
   const { data: note, isLoading, isError } = useNote(noteId);
 
   if (isLoading) {
@@ -17,10 +23,18 @@ export function NoteEditorPane({ noteId }: Props) {
   }
 
   return (
-    <NoteEditor 
-      key={note.id}
-      noteId={note.id}
-      initialContent={note.document.content as unknown as Block[] | undefined}
-    />
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex h-9 shrink-0 items-center justify-end border-b border-border px-6">
+        <NoteActions onShare={onShare} onCopy={onCopy} onExport={onExport} />
+      </div>
+      <TagPicker noteId={note.id} workspaceId={workspaceId} />
+      <div className="min-h-0 flex-1">
+        <NoteEditor
+          key={note.id}
+          noteId={note.id}
+          initialContent={note.document.content as unknown as Block[] | undefined}
+        />
+      </div>
+    </div>
   );
 }

@@ -54,3 +54,15 @@ export function useUpdateNote(noteId: string) {
     },
   });
 }
+
+export function useRenameNote() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, title }: { id: string; title: string }) => updateNote(id, { title }),
+    onSuccess: (note) => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: ["note", note.id] });
+    },
+  });
+}
