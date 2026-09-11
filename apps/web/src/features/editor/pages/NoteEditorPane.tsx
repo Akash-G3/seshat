@@ -1,3 +1,4 @@
+
 import type { Block } from "@blocknote/core";
 import { useNote } from "../hooks/useNote";
 import { NoteEditor } from "../components/NoteEditor";
@@ -24,10 +25,10 @@ export function NoteEditorPane({ noteId, workspaceId, onShare, onCopy, onExport 
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex h-9 shrink-0 items-center justify-end border-b border-border px-6">
+      <div className="flex shrink-0 items-center gap-3 px-8 pt-5">
+        <TagPicker noteId={note.id} workspaceId={workspaceId} />
         <NoteActions onShare={onShare} onCopy={onCopy} onExport={onExport} />
       </div>
-      <TagPicker noteId={note.id} workspaceId={workspaceId} />
       <div className="min-h-0 flex-1">
         <NoteEditor
           key={note.id}

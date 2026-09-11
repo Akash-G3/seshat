@@ -1,3 +1,4 @@
+
 import { useMemo, useState } from "react";
 import { Plus, Tag as TagIcon, X } from "lucide-react";
 import { useCreateTag, useAttachTag, useDetachTag, useNoteTags, useTags } from "../../hooks/useTags";
@@ -35,7 +36,7 @@ export function TagPicker({ noteId, workspaceId }: Props) {
   }
 
   return (
-    <div className="relative border-b border-border bg-bg px-8 py-2">
+    <div className="relative min-w-0 flex-1">
       <div className="flex min-h-7 items-center gap-1.5">
         <TagIcon size={13} className="shrink-0 text-text-muted" />
         {noteTags.map((tag) => (

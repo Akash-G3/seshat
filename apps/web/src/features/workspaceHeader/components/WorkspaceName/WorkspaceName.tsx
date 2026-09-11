@@ -51,7 +51,7 @@ export function WorkspaceName({
         }}
         aria-label="Workspace name"
         className="
-          ml-1
+          ml-1  
           w-36
           rounded-sm
           border

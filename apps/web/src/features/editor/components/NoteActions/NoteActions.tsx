@@ -1,4 +1,7 @@
-import { Copy, Download, Link } from "lucide-react";
+
+import { Copy, Download, Link, MoreHorizontal } from "lucide-react";
+import { DropdownMenu, DropdownMenuItem } from "@components/ui/DropdownMenu";
+import { IconButton } from "@components/ui/IconButton";
 
 interface Props {
   onShare: () => void;
@@ -8,19 +11,23 @@ interface Props {
 
 export function NoteActions({ onShare, onCopy, onExport }: Props) {
   return (
-    <div className="flex items-center gap-0.5">
-      <button type="button" onClick={onShare} className="inline-flex h-7 items-center gap-1.5 rounded-sm px-2 text-xs text-text-muted hover:bg-bg-hover hover:text-text-primary">
-        <Link size={13} />
+    <DropdownMenu
+      align="right"
+      trigger={
+        <IconButton aria-label="Note actions">
+          <MoreHorizontal size={15} />
+        </IconButton>
+      }
+    >
+      <DropdownMenuItem onClick={onShare} icon={<Link size={13} />}>
         Share
-      </button>
-      <button type="button" onClick={onCopy} className="inline-flex h-7 items-center gap-1.5 rounded-sm px-2 text-xs text-text-muted hover:bg-bg-hover hover:text-text-primary">
-        <Copy size={13} />
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={onCopy} icon={<Copy size={13} />}>
         Copy
-      </button>
-      <button type="button" onClick={onExport} className="inline-flex h-7 items-center gap-1.5 rounded-sm px-2 text-xs text-text-muted hover:bg-bg-hover hover:text-text-primary">
-        <Download size={13} />
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={onExport} icon={<Download size={13} />}>
         Export
-      </button>
-    </div>
+      </DropdownMenuItem>
+    </DropdownMenu>
   );
 }
