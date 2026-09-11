@@ -1,3 +1,6 @@
+
+//--UI redesign
+
 import { forwardRef } from "react";
 import type { ButtonHTMLAttributes } from "react";
 
@@ -5,20 +8,24 @@ import type { ButtonHTMLAttributes } from "react";
 // Consumers can hide this button on hover when an action should stay visually quiet.
 interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "default" | "danger";
+  /** Persistent "on" state (e.g. the currently open panel) — a soft accent pill, not just a hover tint. */
+  active?: boolean;
 }
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
-  ({ variant = "default", className = "", ...props }, ref) => {
+  ({ variant = "default", active = false, className = "", ...props }, ref) => {
     const variantClass =
       variant === "danger"
-        ? "hover:bg-danger-subtle hover:text-danger"
-        : "hover:bg-bg-hover text-text-secondary hover:text-text-primary";
+        ? "text-text-secondary hover:bg-danger-subtle hover:text-danger"
+        : active
+          ? "bg-accent-subtle text-accent"
+          : "text-text-secondary hover:bg-bg-hover hover:text-text-primary";
 
     return (
       <button
         ref={ref}
         type="button"
-        className={`inline-flex items-center justify-center w-6 h-6 rounded-sm transition-colors ${variantClass} ${className}`}
+        className={`inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150 ${variantClass} ${className}`}
         {...props}
       />
     );

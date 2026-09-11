@@ -1,3 +1,5 @@
+
+//--UI redesign
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
@@ -29,14 +31,17 @@ export function DropdownMenu({ trigger, children, open: controlledOpen, onOpenCh
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [controlledOpen]);
 
-  const position = side === "top" ? "bottom-full mb-1" : "top-full mt-1";
+  const position = side === "top" ? "bottom-full mb-1.5" : "top-full mt-1.5";
   const alignment = align === "left" ? "left-0" : "right-0";
 
   return (
     <div className="relative" ref={ref}>
       <div onClick={() => setOpen(!open)}>{trigger}</div>
       {open && (
-        <div className={`absolute ${alignment} ${position} z-50 min-w-[170px] overflow-hidden rounded-md border border-border bg-bg py-1 shadow-lg`} onClick={() => setOpen(false)}>
+        <div
+          className={`absolute ${alignment} ${position} z-50 min-w-[180px] origin-top overflow-hidden rounded-lg border border-border bg-bg py-1 shadow-[var(--shadow-md)] animate-[menu-in_0.12s_ease-out]`}
+          onClick={() => setOpen(false)}
+        >
           {children}
         </div>
       )}
@@ -46,7 +51,7 @@ export function DropdownMenu({ trigger, children, open: controlledOpen, onOpenCh
 
 export function DropdownMenuItem({ onClick, danger, icon, children }: { onClick: () => void; danger?: boolean; icon?: ReactNode; children: ReactNode }) {
   return (
-    <button type="button" onClick={onClick} className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm transition-colors ${danger ? "text-danger hover:bg-danger-subtle" : "text-text-secondary hover:bg-bg-hover hover:text-text-primary"}`}>
+    <button type="button" onClick={onClick} className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm transition-colors duration-150 ${danger ? "text-danger hover:bg-danger-subtle" : "text-text-secondary hover:bg-bg-hover hover:text-text-primary"}`}>
       {icon && <span className="shrink-0">{icon}</span>}
       <span>{children}</span>
     </button>
