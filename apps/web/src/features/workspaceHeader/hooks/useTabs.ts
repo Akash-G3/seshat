@@ -6,7 +6,11 @@ export function useTabs() {
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
 
   const openTab = useCallback((tab: OpenTab) => {
-    setTabs((current) => current.some((item) => item.noteId === tab.noteId) ? current : [...current, tab]);
+    setTabs((current) =>
+      current.some((item) => item.noteId === tab.noteId)
+        ? current
+        : [...current, tab],
+    );
     setActiveTabId(tab.noteId);
   }, []);
 
@@ -14,17 +18,44 @@ export function useTabs() {
     setTabs((current) => {
       const index = current.findIndex((tab) => tab.noteId === noteId);
       const next = current.filter((tab) => tab.noteId !== noteId);
-      setActiveTabId((active) => active === noteId ? next[index]?.noteId ?? next[index - 1]?.noteId ?? null : active);
+
+      setActiveTabId((active) =>
+        active === noteId
+          ? next[index]?.noteId ?? next[index - 1]?.noteId ?? null
+          : active,
+      );
+
       return next;
     });
   }, []);
 
   const syncTitles = useCallback((titles: Map<string, string>) => {
-    setTabs((current) => current.map((tab) => {
-      const title = titles.get(tab.noteId);
-      return title !== undefined && title !== tab.title ? { ...tab, title } : tab;
-    }));
+    setTabs((current) => {
+      let changed = false;
+
+      const next = current.map((tab) => {
+        const title = titles.get(tab.noteId);
+
+        if (title !== undefined && title !== tab.title) {
+          changed = true;
+          return { ...tab, title };
+        }
+
+        return tab;
+      });
+
+      // Returning the existing array is important: it prevents a render
+      // when no tab title actually changed.
+      return changed ? next : current;
+    });
   }, []);
 
-  return { tabs, activeTabId, setActiveTabId, openTab, closeTab, syncTitles };
+  return {
+    tabs,
+    activeTabId,
+    setActiveTabId,
+    openTab,
+    closeTab,
+    syncTitles,
+  };
 }
