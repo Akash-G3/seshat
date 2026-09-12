@@ -1,29 +1,3 @@
-/* index.css
-@import "tailwindcss";
-
-@theme {
-  --color-bg: #ffffff;
-  --color-bg-subtle: #fafafa;
-  --color-bg-hover: #f1f1f2;
-  --color-border: #e4e4e7;
-
-  --color-text-primary: #18181b;
-  --color-text-secondary: #71717a;
-  --color-text-muted: #a1a1aa;
-
-  --color-accent: #0e7490;
-  --color-accent-subtle: #ecfeff;
-
-  --color-danger: #dc2626;
-  --color-danger-subtle: #fef2f2;
-
-  --radius-sm: 4px;
-  --radius-md: 6px;
-
-  --font-sans: Inter, system-ui, sans-serif;
-} */
-
-/* //improved version with dark theme support  */
 
 @import "tailwindcss";
 
@@ -44,6 +18,16 @@
 
   --color-danger: #B0503F;
   --color-danger-subtle: #F5E9E6;
+
+    --color-accent: #3D6B63;
+  --color-accent-subtle: #E4EBE8;
+
+  --color-danger: #B0503F;
+  --color-danger-subtle: #F5E9E6;
+
+    --color-bg-header: #F7F6F3;
+  --color-bg-editor: #F7F6F3;
+
 
   --radius-sm: 4px;
   --radius-md: 6px;
@@ -71,6 +55,12 @@
 
   --color-danger: #E5484D;
   --color-danger-subtle: #3B1F1F;
+
+    --color-danger: #E5484D;
+  --color-danger-subtle: #3B1F1F;
+
+    --color-bg-header: #302E29;
+  --color-bg-editor: #171614;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35), 0 1px 1px rgba(0, 0, 0, 0.28);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.4);

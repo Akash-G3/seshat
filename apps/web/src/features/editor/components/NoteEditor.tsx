@@ -76,7 +76,7 @@ export function NoteEditor({ noteId, title, onRenameTitle, initialContent }: Pro
   }, [noteId]);
 
   return (
-    <div className="h-full min-h-0 overflow-y-auto scrollbar-none px-8 py-6">
+    <div className="h-full min-h-0 overflow-y-auto scrollbar-none bg-bg-editor px-8 py-6">
       <NoteTitle title={title} onRename={onRenameTitle} />
       <div className="mt-2">
         <BlockNoteView

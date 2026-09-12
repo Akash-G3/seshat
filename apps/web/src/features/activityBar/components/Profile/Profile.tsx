@@ -1,5 +1,3 @@
-
-//--UI redesign
 import { LogOut, Moon, Settings, Sun, KeyRound } from "lucide-react";
 import { DropdownMenu, DropdownMenuItem } from "@components/ui/DropdownMenu";
 import { useTheme } from "@app/ThemeContext";

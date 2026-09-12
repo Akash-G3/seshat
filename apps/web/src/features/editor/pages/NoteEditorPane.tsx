@@ -20,7 +20,7 @@ export function NoteEditorPane({ noteId, workspaceId, onShare, onCopy, onExport 
 
   if (isLoading) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-2 text-text-muted">
+      <div className="flex h-full flex-col items-center justify-center gap-2 bg-bg-editor text-text-muted">
         <Loader2 size={18} className="animate-spin" strokeWidth={1.8} />
         <p className="text-sm">Loading note…</p>
       </div>
@@ -29,7 +29,7 @@ export function NoteEditorPane({ noteId, workspaceId, onShare, onCopy, onExport 
 
   if (isError || !note) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
+      <div className="flex h-full flex-col items-center justify-center gap-2 bg-bg-editor text-center">
         <FileWarning size={20} strokeWidth={1.7} className="text-danger" />
         <p className="text-sm text-text-secondary">Couldn't load this note</p>
         <p className="text-xs text-text-muted">It may have been moved or removed.</p>
@@ -38,7 +38,7 @@ export function NoteEditorPane({ noteId, workspaceId, onShare, onCopy, onExport 
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div className="flex h-full min-h-0 flex-col bg-bg-editor">
       <div className="flex shrink-0 items-center gap-3 px-8 pt-5">
         <TagPicker noteId={note.id} workspaceId={workspaceId} />
         <NoteActions onShare={onShare} onCopy={onCopy} onExport={onExport} />

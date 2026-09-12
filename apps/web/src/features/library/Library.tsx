@@ -162,7 +162,7 @@ export function Library({
     tree.unfiledNotes.length === 0;
 
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r border-border bg-bg">
+    <aside className="flex w-64 shrink-0 flex-col border-r border-border bg-bg-subtle">
       {/* Library header */}
       <div className="flex h-11 shrink-0 items-center gap-2 border-b border-border bg-bg-subtle px-3.5">
         {view === "favourites" ? (

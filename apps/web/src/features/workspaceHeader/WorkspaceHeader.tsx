@@ -26,7 +26,7 @@ export function WorkspaceHeader({
   onCloseTab,
 }: Props) {
   return (
-    <header className="flex h-12 shrink-0 items-center border-b border-border bg-bg-subtle">
+    <header className="flex h-12 shrink-0 items-center border-b border-border bg-bg-header">
       <div className="flex ml-2 h-full shrink-0 items-center">
         <SidebarToggle onClick={onToggleLibrary} />
 

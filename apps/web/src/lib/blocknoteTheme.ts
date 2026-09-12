@@ -15,14 +15,13 @@ export const lightEditorTheme: Theme = {
   borderRadius: 6,
   fontFamily: "Inter, system-ui, sans-serif",
 };
-
 export const darkEditorTheme: Theme = {
   colors: {
-    editor: { text: "#FAF9F6", background: "#262624" },
-    menu: { text: "#FAF9F6", background: "#2E2D2A" },
-    tooltip: { text: "#262624", background: "#FAF9F6" },
-    hovered: { text: "#FAF9F6", background: "#34332F" },
-    selected: { text: "#262624", background: "#D8D3C7" },
+    editor: { text: "#FAF9F6", background: "#171614" },
+    menu: { text: "#FAF9F6", background: "#262624" },
+    tooltip: { text: "#171614", background: "#FAF9F6" },
+    hovered: { text: "#FAF9F6", background: "#2E2C29" },
+    selected: { text: "#171614", background: "#D8D3C7" },
     disabled: { text: "#75726C", background: "#1A1918" },
     shadow: "#3C3B38",
     border: "#3C3B38",
