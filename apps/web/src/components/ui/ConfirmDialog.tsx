@@ -20,20 +20,20 @@ export function ConfirmDialog({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
-      <div className="bg-bg rounded-md border border-border shadow-lg w-80 p-5">
-        <h2 className="text-sm font-semibold text-text-primary mb-1">{title}</h2>
-        <p className="text-sm text-text-secondary mb-4">{message}</p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 backdrop-blur-[2px]">
+      <div className="w-80 animate-[menu-in_0.15s_ease-out] rounded-lg border border-border bg-bg p-5 shadow-[var(--shadow-md)]">
+        <h2 className="mb-1 text-sm font-semibold text-text-primary">{title}</h2>
+        <p className="mb-4 text-sm text-text-secondary">{message}</p>
         <div className="flex justify-end gap-2">
           <button
             onClick={onCancel}
-            className="px-3 py-1.5 text-sm rounded-sm text-text-secondary hover:bg-bg-hover transition-colors"
+            className="rounded-md px-3 py-1.5 text-sm text-text-secondary transition-colors duration-150 hover:bg-bg-hover"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="px-3 py-1.5 text-sm rounded-sm bg-danger text-white hover:bg-danger/90 transition-colors"
+            className="rounded-md bg-danger px-3 py-1.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-danger/90"
           >
             {confirmLabel}
           </button>

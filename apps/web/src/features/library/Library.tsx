@@ -164,34 +164,34 @@ export function Library({
   return (
     <aside className="flex w-64 shrink-0 flex-col border-r border-border bg-bg">
       {/* Library header */}
-      <div className="flex h-10 shrink-0 items-center gap-2 border-b border-border px-3">
+      <div className="flex h-11 shrink-0 items-center gap-2 border-b border-border bg-bg-subtle px-3.5">
         {view === "favourites" ? (
           <>
-            <button type="button" onClick={onOpenLibrary} title="Open library" aria-label="Open library" className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm text-text-muted transition-colors hover:bg-bg-hover hover:text-text-primary">
+            <button type="button" onClick={onOpenLibrary} title="Open library" aria-label="Open library" className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-text-muted transition-colors duration-150 hover:bg-bg-hover hover:text-text-primary">
               <LibraryIcon size={15} strokeWidth={1.7} />
             </button>
             <Star size={14} strokeWidth={1.7} className="text-text-muted" />
-            <span className="text-xs font-medium uppercase tracking-wide text-text-muted">Favourites</span>
+            <span className="text-sm font-medium text-text-primary">Favourites</span>
           </>
         ) : view === "tags" ? (
           <>
             <Tags size={15} strokeWidth={1.7} className="text-text-muted" />
-            <span className="text-xs font-medium uppercase tracking-wide text-text-muted">Tags</span>
+            <span className="text-sm font-medium text-text-primary">Tags</span>
           </>
         ) : view === "trash" ? (
           <>
             <Trash2 size={15} strokeWidth={1.7} className="text-text-muted" />
-            <span className="text-xs font-medium uppercase tracking-wide text-text-muted">Trash</span>
+            <span className="text-sm font-medium text-text-primary">Trash</span>
           </>
         ) : (
           <>
             <LibraryIcon size={15} strokeWidth={1.7} className="text-text-muted" />
-            <span className="text-xs font-medium uppercase tracking-wide text-text-muted">Library</span>
+            <span className="text-sm font-medium text-text-primary">Library</span>
           </>
         )}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto">
         {view === "favourites" ? (
           <FavouritesView
             favourites={favourites}
@@ -248,7 +248,7 @@ export function Library({
                       ? "Note title"
                       : "Notebook name"
                   }
-                  className="min-w-0 flex-1 rounded-sm border border-accent bg-bg px-1 text-sm text-text-primary outline-none"
+                  className="min-w-0 flex-1 rounded-md border border-accent bg-bg px-1.5 py-1 text-sm text-text-primary outline-none"
                 />
               </div>
             )}

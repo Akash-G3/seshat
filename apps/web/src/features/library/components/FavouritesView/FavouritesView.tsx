@@ -1,3 +1,4 @@
+
 import { FileText, Folder, Star } from "lucide-react";
 import type { Favourite } from "@features/favourites/types/favourite.types";
 import { IconButton } from "@components/ui/IconButton";
@@ -44,7 +45,7 @@ export function FavouritesView({
         return (
           <div
             key={`${item.type}:${item.id}`}
-            className={`group flex h-8 items-center rounded-sm text-sm ${
+            className={`group flex h-8 items-center rounded-md text-sm transition-colors duration-150 ${
               active
                 ? "bg-accent-subtle text-accent"
                 : "text-text-secondary hover:bg-bg-hover hover:text-text-primary"

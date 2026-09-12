@@ -16,7 +16,7 @@ export function NoteTabs({
   onClose,
 }: Props) {
   return (
-    <div className="flex h-full min-w-0 flex-1 items-stretch overflow-x-auto">
+    <div className="scrollbar-none flex h-full min-w-0 flex-1 items-center gap-1 overflow-x-auto px-1">
       {tabs.map((tab) => (
         <NoteTab
           key={tab.noteId}

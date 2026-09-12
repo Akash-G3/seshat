@@ -4,6 +4,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import { signupSchema, type SignupInput } from "./auth.schema";
 import { signupRequest } from "./auth.api";
+import { AuthLayout } from "./components/AuthLayout";
+import { FormField } from "./components/FormField";
 import type { AxiosError } from "axios";
 
 export function SignupForm() {
@@ -37,113 +39,34 @@ export function SignupForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-sm space-y-6 rounded-xl bg-white p-8 shadow-sm">
-        <h1 className="text-xl font-semibold text-gray-900">Create account</h1>
+    <AuthLayout
+      title="Create your account"
+      footer={
+        <p>
+          Already have an account?{" "}
+          <Link to="/login" className="group font-medium text-accent hover:underline">
+            Log in
+            <span className="ml-0.5 inline-block transition-transform group-hover:translate-x-0.5">→</span>
+          </Link>
+        </p>
+      }
+    >
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+        <FormField id="name" label="Name" type="text" autoComplete="name" error={errors.name?.message} {...register("name")} />
+        <FormField id="email" label="Email" type="email" autoComplete="email" error={errors.email?.message} {...register("email")} />
+        <FormField id="password" label="Password" type="password" autoComplete="new-password" error={errors.password?.message} {...register("password")} />
+        <FormField id="confirmPassword" label="Confirm password" type="password" autoComplete="new-password" error={errors.confirmPassword?.message} {...register("confirmPassword")} />
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          noValidate
-          className="space-y-4"
+        {serverError && <p className="text-sm text-danger">{serverError}</p>}
+
+        <button
+          type="submit"
+          disabled={isSubmittingSignup}
+          className="w-full rounded-md bg-accent py-2 text-sm font-medium text-bg transition-opacity duration-150 hover:opacity-90 disabled:opacity-50"
         >
-          <div>
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Name
-            </label>
-
-            <input
-              id="name"
-              type="text"
-              autoComplete="name"
-              {...register("name")}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
-            />
-
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              type="email"
-              autoComplete="email"
-              {...register("email")}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
-            />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.email.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
-              type="password"
-              autoComplete="new-password"
-              {...register("password")}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
-            />
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.password.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Confirm password
-            </label>
-            <input
-              type="password"
-              autoComplete="new-password"
-              {...register("confirmPassword")}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
-            />
-            {errors.confirmPassword && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.confirmPassword.message}
-              </p>
-            )}
-          </div>
-
-          {serverError && <p className="text-sm text-red-600">{serverError}</p>}
-
-          <button
-            type="submit"
-            disabled={isSubmittingSignup}
-            className="w-full rounded-md bg-gray-900 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
-          >
-            {isSubmittingSignup ? "Creating account…" : "Create account"}
-          </button>
-        </form>
-        {/* //bottom element for login redirect */}
-        <div className="mt-8 border-t border-border/60 pt-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="group font-semibold text-foreground transition-colors hover:text-primary"
-            >
-              Log in
-              <span className="ml-1 inline-block transition-transform group-hover:translate-x-0.5">
-                →
-              </span>
-            </Link>
-          </p>
-        </div>
-      </div>
-    </div>
+          {isSubmittingSignup ? "Creating account…" : "Create account"}
+        </button>
+      </form>
+    </AuthLayout>
   );
 }

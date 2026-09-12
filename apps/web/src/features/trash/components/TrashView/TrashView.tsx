@@ -38,7 +38,7 @@ export function TrashView({ workspaceId }: Props) {
             <button
               type="button"
               onClick={() => setPending({ type: "empty" })}
-              className="text-xs text-danger hover:underline"
+              className="rounded-md px-1.5 py-0.5 text-xs text-danger transition-colors duration-150 hover:bg-danger-subtle"
             >
               Empty trash
             </button>
@@ -46,7 +46,7 @@ export function TrashView({ workspaceId }: Props) {
         </div>
 
         {visibleItems.map((item) => (
-          <div key={`${item.type}:${item.id}`} className="group flex min-h-9 items-center rounded-sm px-1 hover:bg-bg-hover">
+          <div key={`${item.type}:${item.id}`} className="group flex min-h-9 items-center rounded-md px-1 transition-colors duration-150 hover:bg-bg-hover">
             {item.type === "note" ? (
               <FileText size={14} className="mx-1.5 shrink-0 text-text-muted" />
             ) : (
@@ -58,7 +58,7 @@ export function TrashView({ workspaceId }: Props) {
               <div className="text-[10px] text-text-muted">{formatDeletedAt(item.deletedAt)}</div>
             </div>
 
-            <div className="flex items-center opacity-0 group-hover:opacity-100">
+            <div className="flex items-center opacity-0 transition-opacity duration-150 group-hover:opacity-100">
               <IconButton
                 title="Restore"
                 aria-label={`Restore ${item.title}`}
@@ -67,6 +67,7 @@ export function TrashView({ workspaceId }: Props) {
                 <RotateCcw size={13} />
               </IconButton>
               <IconButton
+                variant="danger"
                 title="Delete permanently"
                 aria-label={`Delete ${item.title} permanently`}
                 onClick={() => setPending({ type: "item", id: item.id, label: item.title, itemType: item.type })}
@@ -89,7 +90,7 @@ export function TrashView({ workspaceId }: Props) {
       <ConfirmDialog
         open={pending?.type === "item"}
         title="Delete permanently?"
-        message={`“${pending?.label ?? "Item"}” cannot be restored after permanent deletion.`}
+        message={`"${pending?.label ?? "Item"}" cannot be restored after permanent deletion.`}
         confirmLabel="Delete permanently"
         onConfirm={() => {
           if (pending?.id && pending.itemType) {

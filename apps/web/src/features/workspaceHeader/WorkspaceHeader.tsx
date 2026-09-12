@@ -26,7 +26,7 @@ export function WorkspaceHeader({
   onCloseTab,
 }: Props) {
   return (
-    <header className="flex h-12 shrink-0 items-center border-b border-border bg-bg">
+    <header className="flex h-12 shrink-0 items-center border-b border-border bg-bg-subtle">
       <div className="flex ml-2 h-full shrink-0 items-center">
         <SidebarToggle onClick={onToggleLibrary} />
 
@@ -36,19 +36,22 @@ export function WorkspaceHeader({
         />
       </div>
 
+      {/* Divider between workspace controls and the tab strip */}
+      <div className="mx-2 h-5 w-px shrink-0 bg-border" />
+
       {/*
        * Document tabs take all remaining horizontal space.
        *
        * Keeping this as flex-1 means the workspace controls never
        * compete with the tab strip for a fixed width.
        */}
-       <div className="ml-8 min-w-0 flex-1">
-      <NoteTabs
-        tabs={tabs}
-        activeTabId={activeTabId}
-        onSelect={onSelectTab}
-        onClose={onCloseTab}
-      />
+      <div className="min-w-0 flex-1 self-stretch">
+        <NoteTabs
+          tabs={tabs}
+          activeTabId={activeTabId}
+          onSelect={onSelectTab}
+          onClose={onCloseTab}
+        />
       </div>
     </header>
   );

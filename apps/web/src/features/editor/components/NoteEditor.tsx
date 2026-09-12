@@ -8,11 +8,14 @@ import { BlockNoteView } from "@blocknote/mantine";
 import type { Block } from "@blocknote/core";
 import "@blocknote/mantine/style.css";
 import { useUpdateNote } from "@features/workspace/hooks/useNoteMutations";
+import { NoteTitle } from "./NoteTitle/NoteTitle";
 import type { Note } from "@features/workspace/types/workspace.types";
 
 
 interface Props {
   noteId: string;
+  title: string;
+  onRenameTitle: (title: string) => void;
   // Whatever was last persisted in the note's `content` JSONB column.
   // Undefined/empty for a brand-new note.
   initialContent?: Block[];
@@ -23,7 +26,7 @@ const SAVE_DEBOUNCE_MS = 800;
 // Render this keyed by noteId from the parent (key={noteId}) so switching
 // notes mounts a fresh editor instance instead of BlockNote trying to
 // hot-swap content on an existing one.
-export function NoteEditor({ noteId, initialContent }: Props) {
+export function NoteEditor({ noteId, title, onRenameTitle, initialContent }: Props) {
   const queryClient = useQueryClient();
   const updateNote = useUpdateNote(noteId);
   //theme
@@ -74,11 +77,14 @@ export function NoteEditor({ noteId, initialContent }: Props) {
 
   return (
     <div className="h-full min-h-0 overflow-y-auto scrollbar-none px-8 py-6">
-      <BlockNoteView
-        editor={editor}
-        theme={theme === "dark" ? darkEditorTheme : lightEditorTheme}
-        onChange={scheduleSave}
-      />
+      <NoteTitle title={title} onRename={onRenameTitle} />
+      <div className="mt-2">
+        <BlockNoteView
+          editor={editor}
+          theme={theme === "dark" ? darkEditorTheme : lightEditorTheme}
+          onChange={scheduleSave}
+        />
+      </div>
     </div>
   );
 }

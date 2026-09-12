@@ -20,36 +20,25 @@ export function NoteTab({
       className={`
         group
         flex
-        h-full
+        h-8
         min-w-0
-        max-w-52
+        max-w-48
+        shrink-0
         items-center
-        border-r
-        border-border
+        rounded-md
+        transition-colors
+        duration-150
         ${
           active
-            ? "bg-bg"
-            : "bg-bg-subtle"
+            ? "bg-bg text-text-primary shadow-[var(--shadow-sm)]"
+            : "text-text-secondary hover:bg-bg-hover hover:text-text-primary"
         }
       `}
     >
       <button
         type="button"
         onClick={onSelect}
-        className={`
-          flex
-          min-w-0
-          flex-1
-          items-center
-          gap-1.5
-          px-3
-          text-sm
-          ${
-            active
-              ? "text-text-primary"
-              : "text-text-secondary hover:text-text-primary"
-          }
-        `}
+        className="flex min-w-0 flex-1 items-center gap-1.5 px-2.5 text-sm"
       >
         <FileText
           size={13}
@@ -69,21 +58,24 @@ export function NoteTab({
           tab.title || "Untitled"
         }`}
         onClick={onClose}
-        className="
+        className={`
           mr-1
           flex
-          h-6
-          w-6
+          h-5
+          w-5
           shrink-0
           items-center
           justify-center
           rounded-sm
           text-text-muted
           opacity-0
+          transition-opacity
+          duration-150
           hover:bg-bg-hover
           hover:text-text-primary
           group-hover:opacity-100
-        "
+          ${active ? "opacity-70" : ""}
+        `}
       >
         <X
           size={13}

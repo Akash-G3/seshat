@@ -240,7 +240,10 @@ export function Workspace() {
       <WorkspaceShell
         activityBar={
           <ActivityBar
-            libraryOpen={libraryOpen}
+            libraryOpen={libraryOpen && libraryView === "workspace"}
+            favouritesOpen={libraryOpen && libraryView === "favourites"}
+            tagsOpen={libraryOpen && libraryView === "tags"}
+            trashOpen={libraryOpen && libraryView === "trash"}
             onCreateNote={() => setCreateMode("note")}
             onCreateNotebook={() => setCreateMode("notebook")}
             onSearch={() => setSearchOpen(true)}

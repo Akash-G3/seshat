@@ -57,23 +57,23 @@
 }
 
 .dark {
-  --color-bg: #1E1C1A;
-  --color-bg-subtle: #262320;
-  --color-bg-hover: #2E2A26;
-  --color-border: #3A362F;
+  --color-bg: #262624;
+  --color-bg-subtle: #1A1918;
+  --color-bg-hover: #34332F;
+  --color-border: #3C3B38;
 
-  --color-text-primary: #EDEAE4;
-  --color-text-secondary: #A8A296;
-  --color-text-muted: #746F63;
+  --color-text-primary: #FAF9F6;
+  --color-text-secondary: #A9A69F;
+  --color-text-muted: #75726C;
 
-  --color-accent: #5C9188;
-  --color-accent-subtle: #24322E;
+  --color-accent: #D8D3C7;
+  --color-accent-subtle: #45423A;
 
-  --color-danger: #D97B65;
-  --color-danger-subtle: #3A2620;
+  --color-danger: #E5484D;
+  --color-danger-subtle: #3B1F1F;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25), 0 1px 1px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.25);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35), 0 1px 1px rgba(0, 0, 0, 0.28);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 @keyframes menu-in {

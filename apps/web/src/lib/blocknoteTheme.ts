@@ -12,22 +12,22 @@ export const lightEditorTheme: Theme = {
     border: "#DEDAD0",
     sideMenu: "#A19C8F",
   },
-  borderRadius: 4,
+  borderRadius: 6,
   fontFamily: "Inter, system-ui, sans-serif",
 };
 
 export const darkEditorTheme: Theme = {
   colors: {
-    editor: { text: "#EDEAE4", background: "#1E1C1A" },
-    menu: { text: "#EDEAE4", background: "#262320" },
-    tooltip: { text: "#1E1C1A", background: "#EDEAE4" },
-    hovered: { text: "#EDEAE4", background: "#2E2A26" },
-    selected: { text: "#1E1C1A", background: "#5C9188" },
-    disabled: { text: "#746F63", background: "#262320" },
-    shadow: "#3A362F",
-    border: "#3A362F",
-    sideMenu: "#746F63",
+    editor: { text: "#FAF9F6", background: "#262624" },
+    menu: { text: "#FAF9F6", background: "#2E2D2A" },
+    tooltip: { text: "#262624", background: "#FAF9F6" },
+    hovered: { text: "#FAF9F6", background: "#34332F" },
+    selected: { text: "#262624", background: "#D8D3C7" },
+    disabled: { text: "#75726C", background: "#1A1918" },
+    shadow: "#3C3B38",
+    border: "#3C3B38",
+    sideMenu: "#75726C",
   },
-  borderRadius: 4,
+  borderRadius: 6,
   fontFamily: "Inter, system-ui, sans-serif",
 };

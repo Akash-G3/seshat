@@ -2,10 +2,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useState } from "react";
+import { CheckCircle2 } from "lucide-react";
 import { loginSchema, type LoginInput } from "./auth.schema";
 import { loginRequest } from "./auth.api";
 import { useAuth } from "@app/AuthContext";
 import { getMyWorkspace } from "@features/workspace/api/workspace.api";
+import { AuthLayout } from "./components/AuthLayout";
+import { FormField } from "./components/FormField";
 import type { AxiosError } from "axios";
 
 export function LoginForm() {
@@ -43,82 +46,54 @@ export function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-sm space-y-6 rounded-xl bg-white p-8 shadow-sm">
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900">Log in</h1>
-          {handoffMessage && (
-            <p className="mt-2 rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">
-              {handoffMessage}
-            </p>
-          )}
+    <AuthLayout
+      title="Log in to Seshat"
+      footer={
+        <p>
+          New here?{" "}
+          <Link to="/signup" className="group font-medium text-accent hover:underline">
+            Sign up
+            <span className="ml-0.5 inline-block transition-transform group-hover:translate-x-0.5">→</span>
+          </Link>
+        </p>
+      }
+    >
+      {handoffMessage && (
+        <div className="mb-5 flex items-start gap-2 rounded-md bg-accent-subtle px-3 py-2.5 text-sm text-accent">
+          <CheckCircle2 size={16} className="mt-0.5 shrink-0" strokeWidth={1.8} />
+          <span>{handoffMessage}</span>
         </div>
+      )}
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          noValidate
-          className="space-y-4"
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+        <FormField
+          id="email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          error={errors.email?.message}
+          {...register("email")}
+        />
+
+        <FormField
+          id="password"
+          label="Password"
+          type="password"
+          autoComplete="current-password"
+          error={errors.password?.message}
+          {...register("password")}
+        />
+
+        {serverError && <p className="text-sm text-danger">{serverError}</p>}
+
+        <button
+          type="submit"
+          disabled={isSubmittingLogin}
+          className="w-full rounded-md bg-accent py-2 text-sm font-medium text-bg transition-opacity duration-150 hover:opacity-90 disabled:opacity-50"
         >
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              type="email"
-              autoComplete="email"
-              {...register("email")}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
-            />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.email.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
-              type="password"
-              autoComplete="current-password"
-              {...register("password")}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
-            />
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.password.message}
-              </p>
-            )}
-          </div>
-
-          {serverError && <p className="text-sm text-red-600">{serverError}</p>}
-
-          <button
-            type="submit"
-            disabled={isSubmittingLogin}
-            className="w-full rounded-md bg-gray-900 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
-          >
-            {isSubmittingLogin ? "Logging in…" : "Log in"}
-          </button>
-        </form>
-        {/* //bottom link to signup page */}
-        <div className="mt-8 border-t border-border/60 pt-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            New here?{" "}
-            <Link
-              to="/signup"
-              className="group font-semibold text-foreground transition-colors hover:text-primary"
-            >
-              Sign up
-              <span className="ml-1 inline-block transition-transform group-hover:translate-x-0.5">
-                →
-              </span>
-            </Link>
-          </p>
-        </div>
-      </div>
-    </div>
+          {isSubmittingLogin ? "Logging in…" : "Log in"}
+        </button>
+      </form>
+    </AuthLayout>
   );
 }

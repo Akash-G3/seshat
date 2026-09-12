@@ -53,7 +53,7 @@ export function WorkspaceName({
         className="
           ml-1  
           w-36
-          rounded-sm
+          rounded-md
           border
           border-accent
           bg-bg
@@ -76,7 +76,7 @@ export function WorkspaceName({
         ml-1
         max-w-44
         truncate
-        rounded-sm
+        rounded-md
         px-2
         py-1
         text-sm

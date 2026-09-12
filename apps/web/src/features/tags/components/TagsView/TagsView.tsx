@@ -47,6 +47,12 @@ export function TagsView({ workspaceId }: Props) {
   return (
     <>
       <div className="p-2">
+        <div className="mb-2 flex items-center justify-between px-1">
+          <span className="text-xs text-text-muted">
+            {tags.length} tag{tags.length === 1 ? "" : "s"}
+          </span>
+        </div>
+
         <div className="mb-2 flex items-center gap-1">
           <input
             value={newName}
@@ -55,7 +61,7 @@ export function TagsView({ workspaceId }: Props) {
               if (event.key === "Enter") void submitNewTag();
             }}
             placeholder="New tag"
-            className="min-w-0 flex-1 rounded-sm border border-border bg-bg-subtle px-2 py-1.5 text-xs text-text-primary outline-none focus:border-accent"
+            className="min-w-0 flex-1 rounded-md border border-border bg-bg-subtle px-2.5 py-1.5 text-sm text-text-primary outline-none transition-colors duration-150 focus:border-accent"
           />
           <IconButton title="Create tag" aria-label="Create tag" onClick={() => void submitNewTag()}>
             <Plus size={14} />
@@ -63,7 +69,7 @@ export function TagsView({ workspaceId }: Props) {
         </div>
 
         {tags.map((tag) => (
-          <div key={tag.id} className="group flex h-8 items-center rounded-sm hover:bg-bg-hover">
+          <div key={tag.id} className="group flex h-8 items-center rounded-md transition-colors duration-150 hover:bg-bg-hover">
             <Hash size={13} className="ml-2 mr-1.5 shrink-0 text-text-muted" />
             {editingId === tag.id ? (
               <input
@@ -75,12 +81,14 @@ export function TagsView({ workspaceId }: Props) {
                   if (event.key === "Enter") void commitRename();
                   if (event.key === "Escape") setEditingId(null);
                 }}
-                className="min-w-0 flex-1 rounded-sm border border-accent bg-bg px-1 text-xs text-text-primary outline-none"
+                className="min-w-0 flex-1 rounded-md border border-accent bg-bg px-1.5 py-0.5 text-sm text-text-primary outline-none"
               />
             ) : (
               <span className="min-w-0 flex-1 truncate text-sm text-text-secondary">#{tag.name}</span>
             )}
-            <span className="mr-1 text-xs text-text-muted">{tag._count?.notes ?? 0}</span>
+            <span className="mr-1 rounded-full bg-bg-subtle px-1.5 py-0.5 text-xs text-text-muted">
+              {tag._count?.notes ?? 0}
+            </span>
             <DropdownMenu
               trigger={
                 <IconButton title="Tag actions" aria-label="Tag actions">
@@ -97,8 +105,10 @@ export function TagsView({ workspaceId }: Props) {
         ))}
 
         {tags.length === 0 && (
-          <div className="px-2 py-8 text-center text-xs text-text-muted">
-            No tags yet
+          <div className="flex flex-col items-center px-4 py-10 text-center">
+            <Hash size={18} className="mb-2 text-text-muted" strokeWidth={1.6} />
+            <p className="text-sm text-text-secondary">No tags yet</p>
+            <p className="mt-1 text-xs text-text-muted">Create one above, or add tags from a note.</p>
           </div>
         )}
       </div>

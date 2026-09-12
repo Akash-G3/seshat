@@ -181,7 +181,7 @@ export function NotebookItem(props: Props) {
     <div>
       {/* Notebook row */}
       <div
-        className="group flex h-8 items-center rounded-sm hover:bg-bg-hover"
+        className="group flex h-8 items-center rounded-md transition-colors duration-150 hover:bg-bg-hover"
         onDoubleClick={(event) => {
           event.stopPropagation();
           setMenuOpen(true);
@@ -192,7 +192,7 @@ export function NotebookItem(props: Props) {
           onClick={() =>
             setExpanded((current) => !current)
           }
-          className="flex h-6 w-6 shrink-0 items-center justify-center text-text-muted hover:text-text-primary"
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-text-muted transition-colors duration-150 hover:bg-bg-hover hover:text-text-primary"
           aria-label={
             expanded
               ? "Collapse notebook"
@@ -230,7 +230,7 @@ export function NotebookItem(props: Props) {
                 setEditing(false);
               }
             }}
-            className="min-w-0 flex-1 rounded-sm border border-accent bg-bg px-1 text-sm text-text-primary outline-none"
+            className="min-w-0 flex-1 rounded-md border border-accent bg-bg px-1.5 py-0.5 text-sm text-text-primary outline-none"
           />
         ) : (
           <span className="min-w-0 flex-1 truncate text-sm font-medium text-text-primary">
@@ -309,7 +309,7 @@ export function NotebookItem(props: Props) {
 
       {/* Notebook contents */}
       {expanded && (
-        <div className="ml-3 border-l border-border pl-3">
+        <div className="ml-3 border-l border-border/70 pl-3">
           {/* Inline new notebook */}
           {newNotebook && (
             <div className="flex h-8 items-center">
@@ -330,7 +330,7 @@ export function NotebookItem(props: Props) {
                   }
                 }}
                 placeholder="Notebook name"
-                className="min-w-0 flex-1 rounded-sm border border-accent bg-bg px-1 text-sm outline-none"
+                className="min-w-0 flex-1 rounded-md border border-accent bg-bg px-1.5 py-0.5 text-sm outline-none"
               />
             </div>
           )}
@@ -355,7 +355,7 @@ export function NotebookItem(props: Props) {
                   }
                 }}
                 placeholder="Note title"
-                className="min-w-0 flex-1 rounded-sm border border-accent bg-bg px-1 text-sm outline-none"
+                className="min-w-0 flex-1 rounded-md border border-accent bg-bg px-1.5 py-0.5 text-sm outline-none"
               />
             </div>
           )}
