@@ -1,4 +1,5 @@
 
+import { memo } from "react";
 import type { OpenTab } from "./types";
 import { SidebarToggle } from "./components/SidebarToggle/SidebarToggle";
 import { WorkspaceName } from "./components/WorkspaceName/WorkspaceName";
@@ -16,7 +17,7 @@ interface Props {
   onCloseTab: (id: string) => void;
 }
 
-export function WorkspaceHeader({
+export const WorkspaceHeader = memo(function WorkspaceHeader({
   workspaceName,
   tabs,
   activeTabId,
@@ -55,4 +56,4 @@ export function WorkspaceHeader({
       </div>
     </header>
   );
-}
+});

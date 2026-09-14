@@ -1,4 +1,4 @@
-
+import { memo } from "react";
 import type { OpenTab } from "../../types";
 import { NoteTab } from "./NoteTab";
 
@@ -9,7 +9,7 @@ interface Props {
   onClose: (id: string) => void;
 }
 
-export function NoteTabs({
+export const NoteTabs = memo(function NoteTabs({
   tabs,
   activeTabId,
   onSelect,
@@ -22,10 +22,10 @@ export function NoteTabs({
           key={tab.noteId}
           tab={tab}
           active={tab.noteId === activeTabId}
-          onSelect={() => onSelect(tab.noteId)}
-          onClose={() => onClose(tab.noteId)}
+          onSelect={onSelect}
+          onClose={onClose}
         />
       ))}
     </div>
   );
-}
+});

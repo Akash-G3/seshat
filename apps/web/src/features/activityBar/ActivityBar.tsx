@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { CreateNote } from "./components/CreateNote/CreateNote";
 import { CreateNotebook } from "./components/CreateNotebook/CreateNotebook";
 import { Search } from "./components/Search/Search";
@@ -27,7 +28,7 @@ function RailDivider() {
   return <div className="my-2 h-px w-6 shrink-0 bg-border" />;
 }
 
-export function ActivityBar({ libraryOpen, favouritesOpen, tagsOpen, trashOpen, onCreateNote, onCreateNotebook, onSearch, onFavourites, onToggleLibrary, onTags, onTrash, onOpenLibrary }: Props) {
+export const ActivityBar = memo(function ActivityBar({ libraryOpen, favouritesOpen, tagsOpen, trashOpen, onCreateNote, onCreateNotebook, onSearch, onFavourites, onToggleLibrary, onTags, onTrash, onOpenLibrary }: Props) {
   return (
     <aside className="flex w-14 shrink-0 flex-col items-center border-r border-border bg-bg-subtle py-3">
       <div className="flex flex-col items-center gap-1">
@@ -52,4 +53,4 @@ export function ActivityBar({ libraryOpen, favouritesOpen, tagsOpen, trashOpen, 
       </div>
     </aside>
   );
-}
+});

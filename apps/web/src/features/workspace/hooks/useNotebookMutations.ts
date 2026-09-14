@@ -1,16 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createNotebook, renameNotebook, deleteNotebook } from "../api/notebook.api";
-
-// All three notebook mutations in one file since they share the same
-// invalidation target (the notebooks list) and are always used together in the sidebar.
+import type { Notebook } from "../types/workspace.types";
 
 export function useCreateNotebook(workspaceId: string) {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: ({ title, parentId }: { title: string; parentId: string | null }) =>
       createNotebook(workspaceId, title, parentId),
-    // Create needs a real server-generated ID before it's usable (clickable, routable),
-    // so we don't fake an optimistic entry — just refetch once the real one exists.
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notebooks", workspaceId] });
     },
@@ -26,18 +23,17 @@ export function useRenameNotebook(workspaceId: string) {
 
     onMutate: async ({ id, title }) => {
       await queryClient.cancelQueries({ queryKey: key });
-      const previous = queryClient.getQueryData(key);
+      const previous = queryClient.getQueryData<Notebook[]>(key);
 
-      // Optimistically rename in the cached list immediately —
-      // this is why the sidebar updates instantly instead of waiting on the network.
-      queryClient.setQueryData(key, (old: any) =>
-        old?.map((nb: any) => (nb.id === id ? { ...nb, title } : nb))
+      queryClient.setQueryData<Notebook[]>(key, (old) =>
+        old?.map((notebook) =>
+          notebook.id === id ? { ...notebook, title } : notebook,
+        ),
       );
 
       return { previous };
     },
     onError: (_err, _vars, context) => {
-      // Roll back if the server rejects the rename
       if (context?.previous) queryClient.setQueryData(key, context.previous);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
@@ -54,9 +50,11 @@ export function useDeleteNotebook(workspaceId: string) {
 
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: notebooksKey });
-      const previous = queryClient.getQueryData(notebooksKey);
+      const previous = queryClient.getQueryData<Notebook[]>(notebooksKey);
 
-      queryClient.setQueryData(notebooksKey, (old: any) => old?.filter((nb: any) => nb.id !== id));
+      queryClient.setQueryData<Notebook[]>(notebooksKey, (old) =>
+        old?.filter((notebook) => notebook.id !== id),
+      );
 
       return { previous };
     },
@@ -65,9 +63,8 @@ export function useDeleteNotebook(workspaceId: string) {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: notebooksKey });
-      // Notes that were inside the deleted notebook need refetching too —
-      // depending on your backend's delete behavior (cascade delete vs orphan-to-unfiled),
-      // this keeps the note list honest either way.
+      // Keep notes in sync because deleting a notebook can change their
+      // notebook relationship depending on the backend's delete semantics.
       queryClient.invalidateQueries({ queryKey: notesKey });
     },
   });

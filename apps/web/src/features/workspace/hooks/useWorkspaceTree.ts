@@ -5,8 +5,13 @@ import { getNotebooks } from "../api/notebook.api";
 import { getNotes } from "../api/note.api";
 import type { NotebookNode, WorkspaceTree } from "../types/workspace.types";
 
+/**
+ * Builds the sidebar data from the authenticated workspace plus the two
+ * workspace collections. The workspace itself is owned by AuthContext, so
+ * this hook deliberately does not request /workspace a second time.
+ */
 export function useWorkspaceTree() {
-  const { workspace } = useAuth();
+  const { workspace, isLoading: authLoading } = useAuth();
   const workspaceId = workspace?.id;
 
   const [notebooksQuery, notesQuery] = useQueries({
@@ -25,31 +30,33 @@ export function useWorkspaceTree() {
   });
 
   const tree = useMemo<WorkspaceTree | undefined>(() => {
-    const notes = notesQuery.data;
     const notebooks = notebooksQuery.data;
+    const notes = notesQuery.data;
 
-    if (!notes || !notebooks) return undefined;
+    if (!notebooks || !notes) return undefined;
 
-    // Index notes once instead of filtering the complete note list
-    // for every notebook. This keeps tree construction close to O(N).
+    // Index notes once instead of filtering the entire note collection for
+    // every notebook. This keeps tree construction close to O(notes + notebooks).
     const notesByNotebook = new Map<string | null, typeof notes>();
 
     for (const note of notes) {
       const bucket = notesByNotebook.get(note.notebookId);
-      if (bucket) bucket.push(note);
-      else notesByNotebook.set(note.notebookId, [note]);
+      if (bucket) {
+        bucket.push(note);
+      } else {
+        notesByNotebook.set(note.notebookId, [note]);
+      }
     }
 
-    const nodes = new Map(
-      notebooks.map((notebook) => [
-        notebook.id,
-        {
-          ...notebook,
-          notes: notesByNotebook.get(notebook.id) ?? [],
-          children: [],
-        },
-      ]),
-    );
+    const nodes = new Map<string, NotebookNode>();
+
+    for (const notebook of notebooks) {
+      nodes.set(notebook.id, {
+        ...notebook,
+        notes: notesByNotebook.get(notebook.id) ?? [],
+        children: [],
+      });
+    }
 
     const roots: NotebookNode[] = [];
 
@@ -58,8 +65,12 @@ export function useWorkspaceTree() {
 
       if (notebook.parentId) {
         const parent = nodes.get(notebook.parentId);
-        if (parent) parent.children.push(node);
-        else roots.push(node);
+        if (parent) {
+          parent.children.push(node);
+        } else {
+          // Keep orphaned notebooks visible instead of silently losing them.
+          roots.push(node);
+        }
       } else {
         roots.push(node);
       }
@@ -74,7 +85,7 @@ export function useWorkspaceTree() {
   return {
     workspace,
     tree,
-    isLoading: notebooksQuery.isLoading || notesQuery.isLoading,
+    isLoading: authLoading || notebooksQuery.isLoading || notesQuery.isLoading,
     isError: notebooksQuery.isError || notesQuery.isError,
   };
 }

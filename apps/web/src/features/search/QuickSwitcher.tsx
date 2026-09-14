@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { FileText, Notebook, Clock } from "lucide-react";
 import { useSearch } from "./useSearch";
 import type { RecentNote } from "./useRecentNotes";
@@ -29,15 +29,19 @@ function HighlightMatch({ text, query }: { text: string; query: string }) {
   );
 }
 
-export function QuickSwitcher({ open, onClose, onSelectNote, recentNotes }: Props) {
+export const QuickSwitcher = memo(function QuickSwitcher({ open, onClose, onSelectNote, recentNotes }: Props) {
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const { results, isLoading } = useSearch(query, open);
 
   const showingRecent = query.trim().length === 0;
-  const items: Item[] = showingRecent
-    ? recentNotes.map((r) => ({ id: r.id, title: r.title, type: "note" }))
-    : results;
+  const items = useMemo<Item[]>(
+    () =>
+      showingRecent
+        ? recentNotes.map((r) => ({ id: r.id, title: r.title, type: "note" }))
+        : results,
+    [recentNotes, results, showingRecent],
+  );
 
   useEffect(() => {
     if (open) {
@@ -116,4 +120,4 @@ export function QuickSwitcher({ open, onClose, onSelectNote, recentNotes }: Prop
       </div>
     </div>
   );
-}
+});

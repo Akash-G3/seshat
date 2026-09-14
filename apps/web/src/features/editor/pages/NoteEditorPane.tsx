@@ -1,3 +1,4 @@
+import { memo, useCallback } from "react";
 import { FileWarning, Loader2 } from "lucide-react";
 import type { Block } from "@blocknote/core";
 import { useNote } from "../hooks/useNote";
@@ -14,9 +15,20 @@ interface Props {
   onExport: () => void;
 }
 
-export function NoteEditorPane({ noteId, workspaceId, onShare, onCopy, onExport }: Props) {
+export const NoteEditorPane = memo(function NoteEditorPane({
+  noteId,
+  workspaceId,
+  onShare,
+  onCopy,
+  onExport,
+}: Props) {
   const { data: note, isLoading, isError } = useNote(noteId);
-  const updateNote = useUpdateNote(noteId);
+  const { mutate: updateNote } = useUpdateNote(noteId);
+
+  const renameTitle = useCallback(
+    (title: string) => updateNote({ title }),
+    [updateNote],
+  );
 
   if (isLoading) {
     return (
@@ -48,10 +60,10 @@ export function NoteEditorPane({ noteId, workspaceId, onShare, onCopy, onExport 
           key={note.id}
           noteId={note.id}
           title={note.title}
-          onRenameTitle={(title) => updateNote.mutate({ title })}
+          onRenameTitle={renameTitle}
           initialContent={note.document.content as unknown as Block[] | undefined}
         />
       </div>
     </div>
   );
-}
+});

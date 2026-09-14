@@ -8,7 +8,14 @@ export interface SearchResult {
   score: number;
 }
 
-export async function searchWorkspace(query: string): Promise<SearchResult[]> {
-  const response = await apiClient.get("/search", { params: { q: query } });
+export async function searchWorkspace(
+  query: string,
+  signal?: AbortSignal,
+): Promise<SearchResult[]> {
+  const response = await apiClient.get("/search", {
+    params: { q: query },
+    signal,
+  });
+
   return response.data.data;
 }

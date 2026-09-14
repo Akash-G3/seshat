@@ -1,7 +1,4 @@
-// FIXED VERSION - src/features/library/Library.tsx
-// Only showing the key changes - paste this over the existing Library component
-
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import {
   FileText,
   Folder,
@@ -19,13 +16,41 @@ import { TagsView } from "@features/tags/components/TagsView/TagsView";
 import { TrashView } from "@features/trash/components/TrashView/TrashView";
 
 import type { Favourite } from "@features/favourites/types/favourite.types";
-import type {
-  WorkspaceTree,
-} from "@features/workspace/types/workspace.types";
+import type { WorkspaceTree } from "@features/workspace/types/workspace.types";
 
-// ... Props interface stays the same ...
+type LibraryView = "workspace" | "favourites" | "tags" | "trash";
+type CreateMode = "note" | "notebook" | null;
 
-export function Library({
+interface Props {
+  tree: WorkspaceTree;
+  activeNoteId: string | null;
+  view: LibraryView;
+  createMode?: CreateMode;
+  onCreateModeChange?: (mode: CreateMode) => void;
+  favourites: Favourite[];
+  favouriteIds: Set<string>;
+  onSelectNote: (id: string) => void;
+  onCreateNote: (notebookId: string | null, title: string) => void;
+  onCreateNotebook: (parentId: string | null, title: string) => void;
+  onRenameNote: (id: string, title: string) => void;
+  onDeleteNote: (id: string) => void;
+  onRenameNotebook: (id: string, title: string) => void;
+  onDeleteNotebook: (id: string) => void;
+  onToggleFavourite: (
+    type: "note" | "notebook",
+    id: string,
+    isFavourite: boolean,
+  ) => void;
+  onOpenLibrary: () => void;
+  workspaceId: string;
+  onShareNote: (id: string) => void;
+  onShareNotebook: (id: string) => void;
+  onCopyNote: (id: string) => void;
+  onCopyNotebook: (id: string) => void;
+  onExportNote: (id: string) => void;
+}
+
+export const Library = memo(function Library({
   tree,
   activeNoteId,
   view,
@@ -51,82 +76,30 @@ export function Library({
 }: Props) {
   const [newTitle, setNewTitle] = useState("");
 
-  // Clear root creation input when mode changes
   useEffect(() => {
-    if (createMode) {
-      setNewTitle("");
-    }
+    if (createMode) setNewTitle("");
   }, [createMode]);
 
-  // ✅ FIX #1: Memoize all callbacks passed to children
-  // This prevents unnecessary re-renders of NotebookItem and NoteItem components
-  const handleSelectNote = useCallback((id: string) => {
-    onSelectNote(id);
-  }, [onSelectNote]);
-
-  const handleCreateNote = useCallback((notebookId: string | null, title: string) => {
-    onCreateNote(notebookId, title);
-  }, [onCreateNote]);
-
-  const handleCreateNotebook = useCallback((parentId: string | null, title: string) => {
-    onCreateNotebook(parentId, title);
-  }, [onCreateNotebook]);
-
-  const handleRenameNote = useCallback((id: string, title: string) => {
-    onRenameNote(id, title);
-  }, [onRenameNote]);
-
-  const handleDeleteNote = useCallback((id: string) => {
-    onDeleteNote(id);
-  }, [onDeleteNote]);
-
-  const handleRenameNotebook = useCallback((id: string, title: string) => {
-    onRenameNotebook(id, title);
-  }, [onRenameNotebook]);
-
-  const handleDeleteNotebook = useCallback((id: string) => {
-    onDeleteNotebook(id);
-  }, [onDeleteNotebook]);
-
-  const handleToggleFavourite = useCallback(
-    (type: "note" | "notebook", id: string, isFavourite: boolean) => {
-      onToggleFavourite(type, id, isFavourite);
+  const handleToggleNoteFavourite = useCallback(
+    (id: string, isFavourite: boolean) => {
+      onToggleFavourite("note", id, isFavourite);
     },
     [onToggleFavourite],
   );
 
-  const handleShareNote = useCallback((id: string) => {
-    onShareNote(id);
-  }, [onShareNote]);
-
-  const handleShareNotebook = useCallback((id: string) => {
-    onShareNotebook(id);
-  }, [onShareNotebook]);
-
-  const handleCopyNote = useCallback((id: string) => {
-    onCopyNote(id);
-  }, [onCopyNote]);
-
-  const handleCopyNotebook = useCallback((id: string) => {
-    onCopyNotebook(id);
-  }, [onCopyNotebook]);
-
-  const handleExportNote = useCallback((id: string) => {
-    onExportNote(id);
-  }, [onExportNote]);
-
-  // ✅ FIX #2: Memoize computed values
-  const empty = useMemo(
-    () => tree.notebooks.length === 0 && tree.unfiledNotes.length === 0,
-    [tree],
+  const handleRemoveFavourite = useCallback(
+    (type: "note" | "notebook", id: string) => {
+      onToggleFavourite(type, id, true);
+    },
+    [onToggleFavourite],
   );
 
-  function cancelCreate() {
+  const cancelCreate = useCallback(() => {
     setNewTitle("");
     onCreateModeChange?.(null);
-  }
+  }, [onCreateModeChange]);
 
-  function commitCreate() {
+  const commitCreate = useCallback(() => {
     const title = newTitle.trim();
 
     if (!title || !createMode) {
@@ -135,26 +108,34 @@ export function Library({
     }
 
     if (createMode === "note") {
-      handleCreateNote(null, title);
+      onCreateNote(null, title);
     } else {
-      handleCreateNotebook(null, title);
+      onCreateNotebook(null, title);
     }
 
     setNewTitle("");
     onCreateModeChange?.(null);
-  }
+  }, [
+    cancelCreate,
+    createMode,
+    newTitle,
+    onCreateModeChange,
+    onCreateNote,
+    onCreateNotebook,
+  ]);
+
+  const empty = tree.notebooks.length === 0 && tree.unfiledNotes.length === 0;
 
   return (
     <aside className="flex w-64 shrink-0 flex-col border-r border-border bg-bg-subtle">
-      {/* Library header */}
       <div className="flex h-11 shrink-0 items-center gap-2 border-b border-border bg-bg-subtle px-3.5">
         {view === "favourites" ? (
           <>
-            <button 
-              type="button" 
-              onClick={onOpenLibrary} 
-              title="Open library" 
-              aria-label="Open library" 
+            <button
+              type="button"
+              onClick={onOpenLibrary}
+              title="Open library"
+              aria-label="Open library"
               className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-text-muted transition-colors duration-150 hover:bg-bg-hover hover:text-text-primary"
             >
               <LibraryIcon size={15} strokeWidth={1.7} />
@@ -185,10 +166,8 @@ export function Library({
           <FavouritesView
             favourites={favourites}
             activeNoteId={activeNoteId}
-            onSelectNote={handleSelectNote}
-            onRemoveFavourite={(type, id) => 
-              handleToggleFavourite(type, id, true)
-            }
+            onSelectNote={onSelectNote}
+            onRemoveFavourite={handleRemoveFavourite}
           />
         ) : view === "tags" ? (
           <TagsView workspaceId={workspaceId} />
@@ -196,124 +175,80 @@ export function Library({
           <TrashView workspaceId={workspaceId} />
         ) : (
           <div className="p-1.5">
-            {/* Root-level creation */}
             {createMode && (
               <div className="mb-1 flex h-8 items-center">
                 {createMode === "note" ? (
-                  <FileText
-                    size={14}
-                    className="mr-1.5 shrink-0 text-text-muted"
-                    strokeWidth={1.7}
-                  />
+                  <FileText size={14} className="mr-1.5 shrink-0 text-text-muted" strokeWidth={1.7} />
                 ) : (
-                  <Folder
-                    size={14}
-                    className="mr-1.5 shrink-0 text-text-muted"
-                    strokeWidth={1.7}
-                  />
+                  <Folder size={14} className="mr-1.5 shrink-0 text-text-muted" strokeWidth={1.7} />
                 )}
 
                 <input
                   autoFocus
                   value={newTitle}
-                  onChange={(event) =>
-                    setNewTitle(event.target.value)
-                  }
+                  onChange={(event) => setNewTitle(event.target.value)}
                   onBlur={commitCreate}
                   onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      commitCreate();
-                    }
-                    if (event.key === "Escape") {
-                      cancelCreate();
-                    }
+                    if (event.key === "Enter") commitCreate();
+                    if (event.key === "Escape") cancelCreate();
                   }}
-                  placeholder={
-                    createMode === "note"
-                      ? "Note title"
-                      : "Notebook name"
-                  }
+                  placeholder={createMode === "note" ? "Note title" : "Notebook name"}
                   className="min-w-0 flex-1 rounded-md border border-accent bg-bg px-1.5 py-1 text-sm text-text-primary outline-none"
                 />
               </div>
             )}
 
-            {/* Root notebooks */}
-            {tree.notebooks.map(
-              (notebook) => (
-                <NotebookItem
-                  key={notebook.id}
-                  notebook={notebook}
-                  activeNoteId={activeNoteId}
-                  favouriteIds={favouriteIds}
-                  onSelectNote={handleSelectNote}  // ✅ Now memoized
-                  onCreateNote={handleCreateNote}  // ✅ Now memoized
-                  onCreateNotebook={handleCreateNotebook}  // ✅ Now memoized
-                  onRenameNotebook={handleRenameNotebook}  // ✅ Now memoized
-                  onDeleteNotebook={handleDeleteNotebook}  // ✅ Now memoized
-                  onRenameNote={handleRenameNote}  // ✅ Now memoized
-                  onDeleteNote={handleDeleteNote}  // ✅ Now memoized
-                  onToggleFavourite={handleToggleFavourite}  // ✅ Now memoized
-                  onShare={handleShareNotebook}  // ✅ Now memoized
-                  onCopy={handleCopyNotebook}  // ✅ Now memoized
-                  onExport={handleExportNote}  // ✅ Now memoized
-                />
-              ),
-            )}
+            {tree.notebooks.map((notebook) => (
+              <NotebookItem
+                key={notebook.id}
+                notebook={notebook}
+                activeNoteId={activeNoteId}
+                favouriteIds={favouriteIds}
+                onSelectNote={onSelectNote}
+                onCreateNote={onCreateNote}
+                onCreateNotebook={onCreateNotebook}
+                onRenameNotebook={onRenameNotebook}
+                onDeleteNotebook={onDeleteNotebook}
+                onRenameNote={onRenameNote}
+                onDeleteNote={onDeleteNote}
+                onToggleFavourite={onToggleFavourite}
+                onShareNotebook={onShareNotebook}
+                onCopyNotebook={onCopyNotebook}
+                onShareNote={onShareNote}
+                onCopyNote={onCopyNote}
+                onExportNote={onExportNote}
+              />
+            ))}
 
-            {/* Unfiled notes */}
             {tree.unfiledNotes.length > 0 && (
               <div className="mt-2 border-t border-border pt-2">
                 <div className="flex h-7 items-center gap-1.5 px-2 text-xs font-medium text-text-muted">
-                  <FileText
-                    size={12}
-                    strokeWidth={1.7}
-                  />
+                  <FileText size={12} strokeWidth={1.7} />
                   Unfiled
                 </div>
 
-                {tree.unfiledNotes.map(
-                  (note) => (
-                    <NoteItem
-                      key={note.id}
-                      note={note}
-                      active={
-                        note.id === activeNoteId
-                      }
-                      isFavourite={favouriteIds.has(
-                        `note:${note.id}`,
-                      )}
-                      onSelect={() =>
-                        handleSelectNote(note.id)  // ✅ Now memoized
-                      }
-                      onRename={handleRenameNote}  // ✅ Now memoized
-                      onDelete={() =>
-                        handleDeleteNote(note.id)  // ✅ Now memoized
-                      }
-                      onFavourite={() =>
-                        handleToggleFavourite(
-                          "note",
-                          note.id,
-                          favouriteIds.has(
-                            `note:${note.id}`,
-                          ),
-                        )
-                      }
-                      onShare={() => handleShareNote(note.id)}  // ✅ Now memoized
-                      onCopy={() => handleCopyNote(note.id)}  // ✅ Now memoized
-                      onExport={() => handleExportNote(note.id)}  // ✅ Now memoized
-                    />
-                  ),
-                )}
+                {tree.unfiledNotes.map((note) => (
+                  <NoteItem
+                    key={note.id}
+                    note={note}
+                    active={note.id === activeNoteId}
+                    isFavourite={favouriteIds.has(`note:${note.id}`)}
+                    onSelect={onSelectNote}
+                    onRename={onRenameNote}
+                    onDelete={onDeleteNote}
+                    onFavourite={handleToggleNoteFavourite}
+                    onShare={onShareNote}
+                    onCopy={onCopyNote}
+                    onExport={onExportNote}
+                  />
+                ))}
               </div>
             )}
 
-            {empty && !createMode && (
-              <LibraryEmptyState />
-            )}
+            {empty && !createMode && <LibraryEmptyState />}
           </div>
         )}
       </div>
     </aside>
   );
-}
+});

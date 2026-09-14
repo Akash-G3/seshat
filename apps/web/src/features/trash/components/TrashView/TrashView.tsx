@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { FileText, Folder, RotateCcw, Trash2, X } from "lucide-react";
 import { IconButton } from "@components/ui/IconButton";
 import { ConfirmDialog } from "@components/ui/ConfirmDialog";
@@ -23,7 +23,7 @@ export function TrashView({ workspaceId }: Props) {
   const empty = useEmptyTrash(workspaceId);
   const [pending, setPending] = useState<{ type: "item" | "empty"; id?: string; label?: string; itemType?: "note" | "notebook" } | null>(null);
 
-  const visibleItems = useMemo(() => items, [items]);
+  const visibleItems = items;
 
   if (isLoading) {
     return <div className="p-4 text-xs text-text-muted">Loading trash…</div>;

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { searchWorkspace, type SearchResult } from "./search.api";
 
+const SEARCH_DEBOUNCE_MS = 200;
+
 export function useSearch(query: string, enabled: boolean) {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -8,28 +10,38 @@ export function useSearch(query: string, enabled: boolean) {
 
   useEffect(() => {
     const trimmed = query.trim();
+
     if (!enabled || !trimmed) {
+      requestId.current += 1;
       setResults([]);
       setIsLoading(false);
       return;
     }
 
-    setIsLoading(true);
+    const controller = new AbortController();
     const id = ++requestId.current;
+
+    setIsLoading(true);
+
     const timer = setTimeout(() => {
-      searchWorkspace(trimmed)
+      searchWorkspace(trimmed, controller.signal)
         .then((data) => {
           if (id === requestId.current) setResults(data);
         })
         .catch(() => {
+          // Aborted requests are expected while the user is still typing.
+          if (controller.signal.aborted) return;
           if (id === requestId.current) setResults([]);
         })
         .finally(() => {
           if (id === requestId.current) setIsLoading(false);
         });
-    }, 200);
+    }, SEARCH_DEBOUNCE_MS);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [query, enabled]);
 
   return { results, isLoading };

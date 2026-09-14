@@ -11,13 +11,15 @@ import { useFavourites } from "@features/favourites/hooks/useFavourites";
 import { useAddFavourite, useRemoveFavourite } from "@features/favourites/hooks/useFavouriteMutations";
 import { WorkspaceShell } from "../components/WorkspaceShell";
 import { useWorkspaceTree } from "../hooks/useWorkspaceTree";
-import { useCreateNote, useRenameNote, useUpdateNote } from "../hooks/useNoteMutations";
-import { useCreateNotebook, useDeleteNotebook, useRenameNotebook } from "../hooks/useNotebookMutations";
+import { useCreateNote, useRenameNote } from "../hooks/useNoteMutations";
+import { useCreateNotebook, useRenameNotebook } from "../hooks/useNotebookMutations";
 import { useRenameWorkspace } from "../hooks/useWorkspaceMutations";
 import { ExportDialog } from "@features/export/components/ExportDialog/ExportDialog";
 import { CopyDialog } from "@features/export/components/CopyDialog/CopyDialog";
 import { ShareDialog } from "@features/share/components/ShareDialog/ShareDialog";
 import { useMoveToTrash } from "@features/trash/hooks/useTrash";
+import { useAuth } from "@app/AuthContext";
+import type { NotebookNode } from "../types/workspace.types";
 
 type LibraryView = "workspace" | "favourites" | "tags" | "trash";
 
@@ -51,67 +53,70 @@ export function Workspace() {
   const [shareTarget, setShareTarget] = useState<ShareTarget | null>(null);
   const [exportTarget, setExportTarget] = useState<{ id: string; title: string } | null>(null);
 
+  const { setWorkspace } = useAuth();
   const { workspace, tree, isLoading, isError } = useWorkspaceTree();
   const { tabs, activeTabId, openTab, closeTab, syncTitles } = useTabs();
   const { recent: recentNotes, addRecent } = useRecentNotes();
 
   const workspaceId = workspace?.id ?? "";
 
-  const createNote = useCreateNote(workspaceId);
-  const createNotebook = useCreateNotebook(workspaceId);
-  const renameNotebook = useRenameNotebook(workspaceId);
-  const deleteNotebook = useDeleteNotebook(workspaceId);
-  const updateNote = useUpdateNote(activeNoteId ?? "");
-  const renameNote = useRenameNote();
-  const renameWorkspace = useRenameWorkspace();
+  const { mutate: createNote } = useCreateNote(workspaceId);
+  const { mutate: createNotebook } = useCreateNotebook(workspaceId);
+  const { mutate: renameNotebook } = useRenameNotebook(workspaceId);
+  const { mutate: renameNote } = useRenameNote();
+  const { mutate: renameWorkspaceMutation } = useRenameWorkspace();
 
   const { data: favourites = [] } = useFavourites(workspaceId);
-  const addFavourite = useAddFavourite(workspaceId);
-  const removeFavourite = useRemoveFavourite(workspaceId);
+  const { mutate: addFavourite } = useAddFavourite(workspaceId);
+  const { mutate: removeFavourite } = useRemoveFavourite(workspaceId);
 
-  const moveToTrash = useMoveToTrash(workspaceId);
+  const { mutate: moveToTrash } = useMoveToTrash(workspaceId);
 
   const favouriteIds = useMemo(
     () => new Set(favourites.map((item) => `${item.type}:${item.id}`)),
     [favourites],
   );
 
-  const findNote = useCallback((noteId: string) => {
-    if (!tree) return undefined;
+  const { noteIndex, notebookIndex } = useMemo(() => {
+    const notes = new Map<string, { title: string; notebookId: string | null }>();
+    const notebooks = new Map<string, { id: string; title: string; parentId: string | null }>();
 
-    function search(notebooks: typeof tree.notebooks): { title: string; notebookId: string } | undefined {
-      for (const notebook of notebooks) {
-        const note = notebook.notes.find((item) => item.id === noteId);
-        if (note) return { title: note.title, notebookId: notebook.id };
-        const nested = search(notebook.children);
-        if (nested) return nested;
-      }
-      return undefined;
-    }
+    if (!tree) return { noteIndex: notes, notebookIndex: notebooks };
 
-    const nested = search(tree.notebooks);
-    if (nested) return nested;
+    const walk = (nodes: NotebookNode[]) => {
+      for (const notebook of nodes) {
+        notebooks.set(notebook.id, {
+          id: notebook.id,
+          title: notebook.title,
+          parentId: notebook.parentId,
+        });
 
-    const note = tree.unfiledNotes.find((item) => item.id === noteId);
-    return note ? { title: note.title, notebookId: null } : undefined;
-  }, [tree]);
-
-  const findNotebook = useCallback((notebookId: string) => {
-    if (!tree) return undefined;
-
-    function search(notebooks: typeof tree.notebooks): { id: string; title: string; parentId: string | null } | undefined {
-      for (const notebook of notebooks) {
-        if (notebook.id === notebookId) {
-          return { id: notebook.id, title: notebook.title, parentId: notebook.parentId };
+        for (const note of notebook.notes) {
+          notes.set(note.id, { title: note.title, notebookId: notebook.id });
         }
-        const nested = search(notebook.children);
-        if (nested) return nested;
+
+        walk(notebook.children);
       }
-      return undefined;
+    };
+
+    walk(tree.notebooks);
+
+    for (const note of tree.unfiledNotes) {
+      notes.set(note.id, { title: note.title, notebookId: null });
     }
 
-    return search(tree.notebooks);
+    return { noteIndex: notes, notebookIndex: notebooks };
   }, [tree]);
+
+  const findNote = useCallback(
+    (noteId: string) => noteIndex.get(noteId),
+    [noteIndex],
+  );
+
+  const findNotebook = useCallback(
+    (notebookId: string) => notebookIndex.get(notebookId),
+    [notebookIndex],
+  );
 
   const selectNote = useCallback((noteId: string) => {
     const info = findNote(noteId);
@@ -133,22 +138,15 @@ export function Workspace() {
     }
   }, [tabs, closeTab, activeNoteId]);
 
-  useEffect(() => {
-    if (!tree) return;
-
+  const noteTitles = useMemo(() => {
     const titles = new Map<string, string>();
+    for (const [id, info] of noteIndex) titles.set(id, info.title);
+    return titles;
+  }, [noteIndex]);
 
-    function collect(notebooks: typeof tree.notebooks) {
-      notebooks.forEach((notebook) => {
-        notebook.notes.forEach((note) => titles.set(note.id, note.title));
-        collect(notebook.children);
-      });
-    }
-
-    collect(tree.notebooks);
-    tree.unfiledNotes.forEach((note) => titles.set(note.id, note.title));
-    syncTitles(titles);
-  }, [tree, syncTitles]);
+  useEffect(() => {
+    syncTitles(noteTitles);
+  }, [noteTitles, syncTitles]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -162,42 +160,63 @@ export function Workspace() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  function toggleFavourite(type: "note" | "notebook", id: string, isFavourite: boolean) {
-    const target = { type, id } as const;
-    if (isFavourite) removeFavourite.mutate(target);
-    else addFavourite.mutate(target);
-  }
+  const toggleFavourite = useCallback(
+    (type: "note" | "notebook", id: string, isFavourite: boolean) => {
+      const target = { type, id } as const;
+      if (isFavourite) removeFavourite(target);
+      else addFavourite(target);
+    },
+    [addFavourite, removeFavourite],
+  );
 
-  function createNewNote(notebookId: string | null, title: string) {
-    if (!workspaceId) return;
+  const createNewNote = useCallback(
+    (notebookId: string | null, title: string) => {
+      if (!workspaceId) return;
+      createNote(
+        { notebookId, title },
+        { onSuccess: (note) => selectNote(note.id) },
+      );
+    },
+    [createNote, selectNote, workspaceId],
+  );
 
-    createNote.mutate({ notebookId, title }, {
-      onSuccess: (note) => selectNote(note.id),
-    });
-  }
+  const createNewNotebook = useCallback(
+    (title: string, parentId: string | null = null) => {
+      if (!workspaceId) return;
+      createNotebook({ title, parentId });
+    },
+    [createNotebook, workspaceId],
+  );
 
-  function createNewNotebook(title: string, parentId: string | null = null) {
-    if (!workspaceId) return;
-    createNotebook.mutate({ title, parentId });
-  }
+  const createNotebookByParent = useCallback(
+    (parentId: string | null, title: string) => {
+      createNewNotebook(title, parentId);
+    },
+    [createNewNotebook],
+  );
 
-  function askTrash(type: "note" | "notebook", id: string) {
-    const label = type === "note"
-      ? findNote(id)?.title || "Untitled"
-      : findNotebook(id)?.title || "Notebook";
+  const askTrash = useCallback(
+    (type: "note" | "notebook", id: string) => {
+      const label =
+        type === "note"
+          ? findNote(id)?.title || "Untitled"
+          : findNotebook(id)?.title || "Notebook";
 
-    setPendingDelete({ type, id, label });
-  }
+      setPendingDelete({ type, id, label });
+    },
+    [findNote, findNotebook],
+  );
 
-  function confirmTrash() {
+  const confirmTrash = useCallback(() => {
     if (!pendingDelete) return;
 
-    moveToTrash.mutate(
-      { type: pendingDelete.type, id: pendingDelete.id },
+    const target = pendingDelete;
+    moveToTrash(
+      { type: target.type, id: target.id },
       {
         onSuccess: () => {
-          if (pendingDelete.type === "note" && activeNoteId === pendingDelete.id) {
-            closeTab(pendingDelete.id);
+          if (target.type === "note" && activeNoteId === target.id) {
+            closeTab(target.id);
             setActiveNoteId(null);
           }
         },
@@ -205,27 +224,114 @@ export function Workspace() {
     );
 
     setPendingDelete(null);
-  }
+  }, [activeNoteId, closeTab, moveToTrash, pendingDelete]);
 
-  function openShare(type: "note" | "notebook", id: string) {
-    const title = type === "note"
-      ? findNote(id)?.title || "Untitled"
-      : findNotebook(id)?.title || "Notebook";
+  const openShare = useCallback(
+    (type: "note" | "notebook", id: string) => {
+      const title =
+        type === "note"
+          ? findNote(id)?.title || "Untitled"
+          : findNotebook(id)?.title || "Notebook";
 
-    setShareTarget({ type, id, title });
-  }
+      setShareTarget({ type, id, title });
+    },
+    [findNote, findNotebook],
+  );
 
-  function openCopy(type: "note" | "notebook", id: string) {
-    const note = type === "note" ? findNote(id) : undefined;
-    const notebook = type === "notebook" ? findNotebook(id) : undefined;
+  const openCopy = useCallback(
+    (type: "note" | "notebook", id: string) => {
+      const note = type === "note" ? findNote(id) : undefined;
+      const notebook = type === "notebook" ? findNotebook(id) : undefined;
 
-    setCopyTarget({
-      type,
-      id,
-      title: type === "note" ? note?.title || "Untitled" : notebook?.title || "Notebook",
-      notebookId: note?.notebookId,
-    });
-  }
+      setCopyTarget({
+        type,
+        id,
+        title: type === "note" ? note?.title || "Untitled" : notebook?.title || "Notebook",
+        notebookId: note?.notebookId,
+      });
+    },
+    [findNote, findNotebook],
+  );
+
+  const exportNote = useCallback(
+    (id: string) => {
+      setExportTarget({ id, title: findNote(id)?.title || "Untitled" });
+    },
+    [findNote],
+  );
+
+  const renameNoteById = useCallback(
+    (id: string, title: string) => renameNote({ id, title }),
+    [renameNote],
+  );
+
+  const renameNotebookById = useCallback(
+    (id: string, title: string) => renameNotebook({ id, title }),
+    [renameNotebook],
+  );
+
+  const deleteNotebookById = useCallback(
+    (id: string) => askTrash("notebook", id),
+    [askTrash],
+  );
+
+  const deleteNoteById = useCallback(
+    (id: string) => askTrash("note", id),
+    [askTrash],
+  );
+
+  const renameWorkspace = useCallback(
+    (name: string) => {
+      renameWorkspaceMutation(name, {
+        onSuccess: setWorkspace,
+      });
+    },
+    [renameWorkspaceMutation, setWorkspace],
+  );
+
+  const handleCreateModeNote = useCallback(() => setCreateMode("note"), []);
+  const handleCreateModeNotebook = useCallback(() => setCreateMode("notebook"), []);
+  const handleOpenSearch = useCallback(() => setSearchOpen(true), []);
+  const handleOpenLibrary = useCallback(() => {
+    setLibraryOpen(true);
+    setLibraryView("workspace");
+  }, []);
+  const handleOpenFavourites = useCallback(() => {
+    setLibraryOpen(true);
+    setLibraryView("favourites");
+  }, []);
+  const handleOpenTags = useCallback(() => {
+    setLibraryOpen(true);
+    setLibraryView("tags");
+  }, []);
+  const handleOpenTrash = useCallback(() => {
+    setLibraryOpen(true);
+    setLibraryView("trash");
+  }, []);
+  const handleToggleLibrary = useCallback(() => {
+    setLibraryOpen((value) => !value);
+    setLibraryView("workspace");
+  }, []);
+  const handleCloseSearch = useCallback(() => setSearchOpen(false), []);
+  const handleClosePendingDelete = useCallback(() => setPendingDelete(null), []);
+  const handleCloseCopy = useCallback(() => setCopyTarget(null), []);
+  const handleCloseExport = useCallback(() => setExportTarget(null), []);
+  const handleCloseShare = useCallback(() => setShareTarget(null), []);
+
+  const shareNote = useCallback((id: string) => openShare("note", id), [openShare]);
+  const shareNotebook = useCallback((id: string) => openShare("notebook", id), [openShare]);
+  const copyNote = useCallback((id: string) => openCopy("note", id), [openCopy]);
+  const copyNotebook = useCallback((id: string) => openCopy("notebook", id), [openCopy]);
+  const handleLibraryView = useCallback(() => setLibraryView("workspace"), []);
+  const editorShare = useCallback(() => {
+    if (activeNoteId) openShare("note", activeNoteId);
+  }, [activeNoteId, openShare]);
+  const editorCopy = useCallback(() => {
+    if (activeNoteId) openCopy("note", activeNoteId);
+  }, [activeNoteId, openCopy]);
+  const editorExport = useCallback(() => {
+    if (activeNoteId) exportNote(activeNoteId);
+  }, [activeNoteId, exportNote]);
 
   if (isLoading) {
     return <div className="flex h-screen items-center justify-center bg-bg text-sm text-text-muted">Loading workspace…</div>;
@@ -244,29 +350,14 @@ export function Workspace() {
             favouritesOpen={libraryOpen && libraryView === "favourites"}
             tagsOpen={libraryOpen && libraryView === "tags"}
             trashOpen={libraryOpen && libraryView === "trash"}
-            onCreateNote={() => setCreateMode("note")}
-            onCreateNotebook={() => setCreateMode("notebook")}
-            onSearch={() => setSearchOpen(true)}
-            onOpenLibrary={() => {
-              setLibraryOpen(true);
-              setLibraryView("workspace");
-            }}
-            onFavourites={() => {
-              setLibraryOpen(true);
-              setLibraryView("favourites");
-            }}
-            onTags={() => {
-              setLibraryOpen(true);
-              setLibraryView("tags");
-            }}
-            onTrash={() => {
-              setLibraryOpen(true);
-              setLibraryView("trash");
-            }}
-            onToggleLibrary={() => {
-              setLibraryOpen((value) => !value);
-              setLibraryView("workspace");
-            }}
+            onCreateNote={handleCreateModeNote}
+            onCreateNotebook={handleCreateModeNotebook}
+            onSearch={handleOpenSearch}
+            onOpenLibrary={handleOpenLibrary}
+            onFavourites={handleOpenFavourites}
+            onTags={handleOpenTags}
+            onTrash={handleOpenTrash}
+            onToggleLibrary={handleToggleLibrary}
           />
         }
         library={
@@ -280,22 +371,20 @@ export function Workspace() {
               favouriteIds={favouriteIds}
               onSelectNote={selectNote}
               onCreateNote={createNewNote}
-              onCreateNotebook={(parentId, title) => createNewNotebook(title, parentId)}
-              onRenameNote={(id, title) => renameNote.mutate({ id, title })}
-              onDeleteNote={(id) => askTrash("note", id)}
-              onRenameNotebook={(id, title) => renameNotebook.mutate({ id, title })}
-              onDeleteNotebook={(id) => askTrash("notebook", id)}
+              onCreateNotebook={createNotebookByParent}
+              onRenameNote={renameNoteById}
+              onDeleteNote={deleteNoteById}
+              onRenameNotebook={renameNotebookById}
+              onDeleteNotebook={deleteNotebookById}
               onToggleFavourite={toggleFavourite}
-              onShareNote={(id) => openShare("note", id)}
-              onShareNotebook={(id) => openShare("notebook", id)}
-              onCopyNote={(id) => openCopy("note", id)}
-              onCopyNotebook={(id) => openCopy("notebook", id)}
-              onExportNote={(id) => {
-                setExportTarget({ id, title: findNote(id)?.title || "Untitled" });
-              }}
+              onShareNote={shareNote}
+              onShareNotebook={shareNotebook}
+              onCopyNote={copyNote}
+              onCopyNotebook={copyNotebook}
+              onExportNote={exportNote}
               createMode={createMode}
               onCreateModeChange={setCreateMode}
-              onOpenLibrary={() => setLibraryView("workspace")}
+              onOpenLibrary={handleLibraryView}
             />
           ) : undefined
         }
@@ -304,8 +393,8 @@ export function Workspace() {
             workspaceName={workspace.name}
             tabs={tabs}
             activeTabId={activeTabId}
-            onToggleLibrary={() => setLibraryOpen((value) => !value)}
-            onRenameWorkspace={(name) => renameWorkspace.mutate(name)}
+            onToggleLibrary={handleToggleLibrary}
+            onRenameWorkspace={renameWorkspace}
             onSelectTab={selectNote}
             onCloseTab={closeNoteTab}
           />
@@ -315,9 +404,9 @@ export function Workspace() {
             <NoteEditorPane
               noteId={activeNoteId}
               workspaceId={workspaceId}
-              onShare={() => openShare("note", activeNoteId)}
-              onCopy={() => openCopy("note", activeNoteId)}
-              onExport={() => setExportTarget({ id: activeNoteId, title: findNote(activeNoteId)?.title || "Untitled" })}
+              onShare={editorShare}
+              onCopy={editorCopy}
+              onExport={editorExport}
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-text-muted">
@@ -329,7 +418,7 @@ export function Workspace() {
 
       <QuickSwitcher
         open={searchOpen}
-        onClose={() => setSearchOpen(false)}
+        onClose={handleCloseSearch}
         onSelectNote={selectNote}
         recentNotes={recentNotes}
       />
@@ -340,7 +429,7 @@ export function Workspace() {
         message={`“${pendingDelete?.label ?? ""}” can be restored from Trash.`}
         confirmLabel="Move to trash"
         onConfirm={confirmTrash}
-        onCancel={() => setPendingDelete(null)}
+        onCancel={handleClosePendingDelete}
       />
 
       {copyTarget && (
@@ -352,7 +441,7 @@ export function Workspace() {
           workspaceId={workspaceId}
           notebooks={tree.notebooks}
           currentNotebookId={copyTarget.notebookId}
-          onClose={() => setCopyTarget(null)}
+          onClose={handleCloseCopy}
         />
       )}
 
@@ -361,7 +450,7 @@ export function Workspace() {
           open
           noteId={exportTarget.id}
           title={exportTarget.title}
-          onClose={() => setExportTarget(null)}
+          onClose={handleCloseExport}
         />
       )}
 
@@ -371,7 +460,7 @@ export function Workspace() {
           type={shareTarget.type}
           id={shareTarget.id}
           title={shareTarget.title}
-          onClose={() => setShareTarget(null)}
+          onClose={handleCloseShare}
         />
       )}
     </>
