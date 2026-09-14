@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, Link } from "react-router-dom";
@@ -22,11 +23,16 @@ export function SignupForm() {
   const onSubmit = async (data: SignupInput) => {
     setServerError(null);
     setIsSubmittingSignup(true);
+
     try {
       await signupRequest(data);
+
       navigate("/login", {
         replace: true,
-        state: { message: "Account created — please log in." },
+        state: {
+          message: "Account created. Check your email to verify your account before logging in.",
+          verificationEmail: data.email,
+        },
       });
     } catch (err) {
       const axiosErr = err as AxiosError<{ message?: string }>;
@@ -44,18 +50,54 @@ export function SignupForm() {
       footer={
         <p>
           Already have an account?{" "}
-          <Link to="/login" className="group font-medium text-accent hover:underline">
+          <Link
+            to="/login"
+            className="group font-medium text-accent hover:underline"
+          >
             Log in
-            <span className="ml-0.5 inline-block transition-transform group-hover:translate-x-0.5">→</span>
+            <span className="ml-0.5 inline-block transition-transform group-hover:translate-x-0.5">
+              →
+            </span>
           </Link>
         </p>
       }
     >
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-        <FormField id="name" label="Name" type="text" autoComplete="name" error={errors.name?.message} {...register("name")} />
-        <FormField id="email" label="Email" type="email" autoComplete="email" error={errors.email?.message} {...register("email")} />
-        <FormField id="password" label="Password" type="password" autoComplete="new-password" error={errors.password?.message} {...register("password")} />
-        <FormField id="confirmPassword" label="Confirm password" type="password" autoComplete="new-password" error={errors.confirmPassword?.message} {...register("confirmPassword")} />
+        <FormField
+          id="name"
+          label="Name"
+          type="text"
+          autoComplete="name"
+          error={errors.name?.message}
+          {...register("name")}
+        />
+
+        <FormField
+          id="email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          error={errors.email?.message}
+          {...register("email")}
+        />
+
+        <FormField
+          id="password"
+          label="Password"
+          type="password"
+          autoComplete="new-password"
+          error={errors.password?.message}
+          {...register("password")}
+        />
+
+        <FormField
+          id="confirmPassword"
+          label="Confirm password"
+          type="password"
+          autoComplete="new-password"
+          error={errors.confirmPassword?.message}
+          {...register("confirmPassword")}
+        />
 
         {serverError && <p className="text-sm text-danger">{serverError}</p>}
 
