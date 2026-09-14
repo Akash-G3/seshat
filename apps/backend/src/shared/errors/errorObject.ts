@@ -71,7 +71,7 @@ export default (err: unknown, req: Request): THttpError => {
     error: {
       name: err instanceof Error ? err.name : typeof err,
       message: err instanceof Error ? err.message : String(err),
-      stack: err instanceof Error ? err.stack ?? null : null,
+      stack: err instanceof Error ? (err.stack ?? null) : null,
       ...(err instanceof AppError
         ? {
             statusCode: err.statusCode,

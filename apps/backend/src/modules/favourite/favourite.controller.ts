@@ -14,7 +14,8 @@ export const favouriteController = {
 
   list: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      const workspaceId = typeof req.query.workspaceId === 'string' ? req.query.workspaceId : undefined;
+      const workspaceId =
+        typeof req.query.workspaceId === 'string' ? req.query.workspaceId : undefined;
       const favourites = await favouriteService.list(req.userId!, workspaceId);
       res.json({ success: true, data: favourites });
     } catch (err) {

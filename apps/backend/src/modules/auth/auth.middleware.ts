@@ -1,4 +1,3 @@
-// module/authMiddleware.ts
 import { Request, Response, NextFunction } from 'express';
 import { verifyAccessToken } from '../../shared/utils/jwt';
 import { AppError } from '../../shared/errors/appError';

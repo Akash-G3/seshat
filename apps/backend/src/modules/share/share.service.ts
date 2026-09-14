@@ -10,7 +10,9 @@ export const shareService = {
     input: { type: 'note' | 'notebook'; id: string; expiresAt?: Date }
   ) => {
     if (input.type === 'note') {
-      const note = await prisma.note.findFirst({ where: { id: input.id, ownerId, deletedAt: null } });
+      const note = await prisma.note.findFirst({
+        where: { id: input.id, ownerId, deletedAt: null },
+      });
       if (!note) throw new NotFoundError('Note not found');
     } else {
       const notebook = await prisma.notebook.findFirst({
@@ -59,7 +61,9 @@ export const shareService = {
     const link = await prisma.shareLink.findUnique({
       where: { tokenHash: hashToken(token) },
       include: {
-        note: { include: { document: { select: { content: true } }, tags: { include: { tag: true } } } },
+        note: {
+          include: { document: { select: { content: true } }, tags: { include: { tag: true } } },
+        },
         notebook: true,
       },
     });
@@ -67,7 +71,8 @@ export const shareService = {
     if (!link || link.revokedAt || (link.expiresAt && link.expiresAt <= new Date())) {
       throw new NotFoundError('Share link not found or expired');
     }
-    if (link.note?.deletedAt || link.notebook?.deletedAt) throw new NotFoundError('Shared item unavailable');
+    if (link.note?.deletedAt || link.notebook?.deletedAt)
+      throw new NotFoundError('Shared item unavailable');
 
     if (link.note) {
       return {

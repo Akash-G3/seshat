@@ -14,7 +14,8 @@ export const tagController = {
 
   list: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      const workspaceId = typeof req.query.workspaceId === 'string' ? req.query.workspaceId : undefined;
+      const workspaceId =
+        typeof req.query.workspaceId === 'string' ? req.query.workspaceId : undefined;
       const tags = await tagService.list(req.userId!, workspaceId);
       res.json({ success: true, data: tags });
     } catch (err) {
@@ -40,9 +41,17 @@ export const tagController = {
     }
   },
 
-  attach: async (req: AuthenticatedRequest<{ noteId: string }>, res: Response, next: NextFunction) => {
+  attach: async (
+    req: AuthenticatedRequest<{ noteId: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const relation = await tagService.attachToNote(req.params.noteId, req.body.tagId, req.userId!);
+      const relation = await tagService.attachToNote(
+        req.params.noteId,
+        req.body.tagId,
+        req.userId!
+      );
       res.status(201).json({ success: true, data: relation.tag });
     } catch (err) {
       next(err);

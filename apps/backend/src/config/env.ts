@@ -1,4 +1,3 @@
-
 import dotenv from 'dotenv';
 import { z } from 'zod';
 import { EApplicationEnvironment } from '../constants/application';
@@ -15,7 +14,7 @@ const envSchema = z.object({
   JWT_ACCESS_SECRET: z.string().min(32),
   JWT_REFRESH_SECRET: z.string().min(32),
   RESEND_API_KEY: z.string().min(1),
-  RESEND_FROM_EMAIL: z.string().min(1,'RESEND_FROM_EMAIL_is required'),
+  RESEND_FROM_EMAIL: z.string().min(1, 'RESEND_FROM_EMAIL_is required'),
   CLIENT_URL: z.url(), // e.g. http://localhost:3000 in dev
   ENABLE_EMAIL_VERIFICATION: z.string().transform((value) => value === 'true'), // this is for conditional email verification
 });

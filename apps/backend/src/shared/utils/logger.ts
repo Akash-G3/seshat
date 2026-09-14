@@ -22,11 +22,6 @@ const colorizeLevel = (level: string) => {
   }
 };
 
-/**
- * Winston stores metadata as properties on the info object. This helper keeps
- * the console/file format predictable and, importantly, preserves Error
- * objects instead of reducing them to `{}`.
- */
 const serialize = (value: unknown): unknown => {
   if (value instanceof Error) {
     return {
@@ -53,7 +48,13 @@ const serialize = (value: unknown): unknown => {
 };
 
 const getMeta = (info: Record<string, unknown>) => {
-  const excluded = new Set(['level', 'message', 'timestamp', Symbol.for('level'), Symbol.for('message')]);
+  const excluded = new Set([
+    'level',
+    'message',
+    'timestamp',
+    Symbol.for('level'),
+    Symbol.for('message'),
+  ]);
   const meta: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(info)) {
@@ -108,7 +109,7 @@ const consoleTransport = (): Array<ConsoleTransportInstance> => {
         format: format.combine(
           format.timestamp(),
           format.errors({ stack: true }),
-          consoleLogFormat,
+          consoleLogFormat
         ),
       }),
     ];
@@ -121,11 +122,7 @@ const fileTransport = (): Array<FileTransportInstance> => [
   new transports.File({
     filename: path.join(__dirname, '../', '../', '../', 'logs', `${env.NODE_ENV}.log`),
     level: 'info',
-    format: format.combine(
-      format.timestamp(),
-      format.errors({ stack: true }),
-      jsonLogFormat,
-    ),
+    format: format.combine(format.timestamp(), format.errors({ stack: true }), jsonLogFormat),
   }),
 ];
 

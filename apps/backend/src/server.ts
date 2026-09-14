@@ -1,4 +1,3 @@
-// -------------- Replaces server file with prisma connection
 import app from './app';
 import { env } from './config/env.js';
 import logger from './shared/utils/logger';

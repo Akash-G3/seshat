@@ -1,4 +1,3 @@
-// note.controller.ts
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../auth/auth.middleware';
 import { noteService } from './note.service';

@@ -1,4 +1,3 @@
-// src/modules/auth/auth.controller.ts
 import { Request, Response } from 'express';
 import {
   registerUser,
@@ -138,7 +137,8 @@ export async function resendVerificationEmailHandler(req: Request, res: Response
 
   return res.status(200).json({
     success: true,
-    message: 'If an account exists with that email and is not verified, a verification link has been sent.',
+    message:
+      'If an account exists with that email and is not verified, a verification link has been sent.',
   });
 }
 

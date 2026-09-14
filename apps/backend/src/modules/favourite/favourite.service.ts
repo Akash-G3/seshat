@@ -6,7 +6,9 @@ export type FavouriteTarget = { type: 'note' | 'notebook'; id: string };
 export const favouriteService = {
   add: async (ownerId: string, target: FavouriteTarget) => {
     if (target.type === 'note') {
-      const note = await prisma.note.findFirst({ where: { id: target.id, ownerId, deletedAt: null } });
+      const note = await prisma.note.findFirst({
+        where: { id: target.id, ownerId, deletedAt: null },
+      });
       if (!note) throw new NotFoundError('Note not found');
       return prisma.favourite.upsert({
         where: { ownerId_noteId: { ownerId, noteId: target.id } },
@@ -46,7 +48,9 @@ export const favouriteService = {
         ],
       },
       include: {
-        note: { select: { id: true, title: true, notebookId: true, workspaceId: true, updatedAt: true } },
+        note: {
+          select: { id: true, title: true, notebookId: true, workspaceId: true, updatedAt: true },
+        },
         notebook: {
           select: { id: true, title: true, parentId: true, workspaceId: true, updatedAt: true },
         },

@@ -5,7 +5,8 @@ import { trashService } from './trash.service';
 export const trashController = {
   list: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      const workspaceId = typeof req.query.workspaceId === 'string' ? req.query.workspaceId : undefined;
+      const workspaceId =
+        typeof req.query.workspaceId === 'string' ? req.query.workspaceId : undefined;
       const items = await trashService.list(req.userId!, workspaceId);
       res.json({ success: true, data: items });
     } catch (err) {

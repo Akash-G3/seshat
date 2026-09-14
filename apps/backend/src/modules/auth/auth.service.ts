@@ -1,4 +1,3 @@
-// src/modules/auth/auth.service.ts
 import crypto from 'crypto';
 import { prisma } from '../../config/prisma';
 import { env } from '../../config/env';
@@ -8,17 +7,6 @@ import { sendVerificationEmail, sendPasswordResetEmail } from '../../shared/util
 import { workspaceService } from '../workspace/workspace.service';
 import { AppError } from '../../shared/errors/appError';
 
-/**
- * ==================== REGISTRATION ====================
- * User registration with email verification (conditional)
- * 
- * Flow:
- * 1. Validate email doesn't exist
- * 2. Hash password
- * 3. Create user (isVerified = !ENABLE_EMAIL_VERIFICATION)
- * 4. Create default workspace
- * 5. If email verification enabled: send verification email
- */
 export async function registerUser(name: string, email: string, password: string) {
   // Check if email already exists
   const existingUser = await prisma.user.findUnique({
@@ -31,9 +19,6 @@ export async function registerUser(name: string, email: string, password: string
   // Hash password
   const hashedPassword = await hashPassword(password);
 
-  // Create user
-  // In production: isVerified = false (user must verify email first)
-  // In development: isVerified = true (skip verification step)
   const user = await prisma.user.create({
     data: {
       name: name.trim(),
@@ -69,17 +54,6 @@ export async function registerUser(name: string, email: string, password: string
   };
 }
 
-/**
- * ==================== LOGIN ====================
- * User login with email verification check
- * 
- * Flow:
- * 1. Find user by email
- * 2. Verify password
- * 3. Check if email is verified (if enabled)
- * 4. Create access & refresh tokens
- * 5. Store refresh token in DB
- */
 export async function loginUser(email: string, password: string) {
   // Find user
   const user = await prisma.user.findUnique({
@@ -140,15 +114,6 @@ export async function loginUser(email: string, password: string) {
   };
 }
 
-/**
- * ==================== REFRESH TOKENS ====================
- * Rotate refresh token and issue new access token
- * 
- * Security:
- * - Detects token reuse (prevents token theft)
- * - Revokes all sessions on suspicious activity
- * - Implements token rotation
- */
 export async function refreshTokens(incomingToken: string) {
   // Verify refresh token signature
   let payload;
@@ -218,10 +183,6 @@ export async function refreshTokens(incomingToken: string) {
   };
 }
 
-/**
- * ==================== LOGOUT ====================
- * Revoke refresh token on logout
- */
 export async function logoutUser(incomingToken: string | undefined) {
   if (!incomingToken) return;
 
@@ -238,16 +199,6 @@ export async function logoutUser(incomingToken: string | undefined) {
   });
 }
 
-/**
- * ==================== EMAIL VERIFICATION ====================
- * Verify user email with token from email link
- * 
- * Flow:
- * 1. Find verification token
- * 2. Check if not expired
- * 3. Mark user as verified (atomic transaction)
- * 4. Delete token (one-time use)
- */
 export async function verifyEmail(token: string) {
   // Find token
   const tokenRecord = await prisma.emailVerificationToken.findUnique({
@@ -264,10 +215,7 @@ export async function verifyEmail(token: string) {
     await prisma.emailVerificationToken.delete({
       where: { id: tokenRecord.id },
     });
-    throw new AppError(
-      'Verification link has expired. Please request a new one.',
-      400
-    );
+    throw new AppError('Verification link has expired. Please request a new one.', 400);
   }
 
   // Mark user as verified and delete token (atomic transaction)
@@ -282,18 +230,6 @@ export async function verifyEmail(token: string) {
   ]);
 }
 
-/**
- * ==================== RESEND VERIFICATION EMAIL ====================
- * Allow user to request a new verification email
- * 
- * Rate limiting:
- * - Max 3 requests per 15 minutes
- * - Prevents email spam
- * 
- * Prevents:
- * - Sending email to already verified users
- * - Multiple concurrent tokens
- */
 export async function resendVerificationEmail(email: string) {
   const user = await prisma.user.findUnique({
     where: { email: email.toLowerCase() },
@@ -323,10 +259,7 @@ export async function resendVerificationEmail(email: string) {
   });
 
   if (recentRequests.length >= MAX_REQUESTS) {
-    throw new AppError(
-      'Too many verification requests. Please try again in 15 minutes.',
-      429
-    );
+    throw new AppError('Too many verification requests. Please try again in 15 minutes.', 429);
   }
 
   // Delete old verification tokens for this user
@@ -348,15 +281,6 @@ export async function resendVerificationEmail(email: string) {
   await sendVerificationEmail(user.email, verificationToken);
 }
 
-/**
- * ==================== PASSWORD RESET ====================
- * Request password reset with email token
- * 
- * Flow:
- * 1. Find user by email
- * 2. Create reset token
- * 3. Send reset email (silently if user not found - privacy)
- */
 export async function requestPasswordReset(email: string) {
   const user = await prisma.user.findUnique({
     where: { email: email.toLowerCase() },
@@ -386,17 +310,6 @@ export async function requestPasswordReset(email: string) {
   await sendPasswordResetEmail(user.email, resetToken);
 }
 
-/**
- * ==================== RESET PASSWORD ====================
- * Complete password reset with token
- * 
- * Flow:
- * 1. Find reset token
- * 2. Validate token is not expired and not used
- * 3. Hash new password
- * 4. Update password and mark token as used (atomic)
- * 5. Revoke all refresh tokens (invalidate all sessions)
- */
 export async function resetPassword(token: string, newPassword: string) {
   // Find token
   const tokenRecord = await prisma.passwordResetToken.findUnique({

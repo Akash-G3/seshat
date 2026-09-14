@@ -33,10 +33,7 @@ const collectInlineText = (value: unknown, output: string[]): void => {
 export const blockNoteToPlainText = (content: Prisma.JsonValue | unknown): string => {
   const chunks: string[] = [];
   collectInlineText(content, chunks);
-  return chunks
-    .join(' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return chunks.join(' ').replace(/\s+/g, ' ').trim();
 };
 
 const inlineToMarkdown = (value: unknown): string => {
@@ -106,5 +103,9 @@ const blockToMarkdown = (block: unknown, depth = 0): string => {
 
 export const blockNoteToMarkdown = (content: Prisma.JsonValue | unknown): string => {
   if (!Array.isArray(content)) return '';
-  return content.map((block) => blockToMarkdown(block)).filter(Boolean).join('\n\n').trim();
+  return content
+    .map((block) => blockToMarkdown(block))
+    .filter(Boolean)
+    .join('\n\n')
+    .trim();
 };

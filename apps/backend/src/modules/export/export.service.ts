@@ -74,7 +74,11 @@ export const exportService = {
     while (changed) {
       changed = false;
       for (const notebook of allNotebooks) {
-        if (notebook.parentId && descendants.has(notebook.parentId) && !descendants.has(notebook.id)) {
+        if (
+          notebook.parentId &&
+          descendants.has(notebook.parentId) &&
+          !descendants.has(notebook.id)
+        ) {
           descendants.add(notebook.id);
           changed = true;
         }
@@ -109,9 +113,9 @@ export const exportService = {
                 ? source.parentId
                 : input.parentId
               : current.parentId
-                ? idMap.get(current.parentId) ?? null
+                ? (idMap.get(current.parentId) ?? null)
                 : null,
-            title: isRoot ? input.title ?? copyTitle(current.title) : current.title,
+            title: isRoot ? (input.title ?? copyTitle(current.title)) : current.title,
           },
         });
         idMap.set(current.id, created.id);
@@ -130,7 +134,7 @@ export const exportService = {
           data: {
             ownerId,
             workspaceId: source.workspaceId,
-            notebookId: sourceNote.notebookId ? idMap.get(sourceNote.notebookId) ?? null : null,
+            notebookId: sourceNote.notebookId ? (idMap.get(sourceNote.notebookId) ?? null) : null,
             title: sourceNote.title,
             documentId: document.id,
           },

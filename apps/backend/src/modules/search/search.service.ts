@@ -27,7 +27,9 @@ export const searchService = {
       : Prisma.empty;
     const typeFilter =
       options.type === 'all' ? Prisma.empty : Prisma.sql`AND item.type = ${options.type}`;
-    const favouriteFilter = options.favouritesOnly ? Prisma.sql`AND item.favourite = TRUE` : Prisma.empty;
+    const favouriteFilter = options.favouritesOnly
+      ? Prisma.sql`AND item.favourite = TRUE`
+      : Prisma.empty;
 
     return prisma.$queryRaw<SearchResultRow[]>(Prisma.sql`
       WITH item AS (

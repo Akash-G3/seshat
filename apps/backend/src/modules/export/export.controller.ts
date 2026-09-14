@@ -10,7 +10,11 @@ const safeFilename = (title: string) =>
     .slice(0, 80) || 'note';
 
 export const exportController = {
-  copyNote: async (req: AuthenticatedRequest<{ id: string }>, res: Response, next: NextFunction) => {
+  copyNote: async (
+    req: AuthenticatedRequest<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const note = await exportService.copyNote(req.params.id, req.userId!, req.body);
       res.status(201).json({ success: true, data: note });

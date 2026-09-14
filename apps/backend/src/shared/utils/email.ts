@@ -1,4 +1,3 @@
-
 import { Resend } from 'resend';
 
 import { env } from '../../config/env';
@@ -10,20 +9,7 @@ const FROM_EMAIL = env.RESEND_FROM_EMAIL;
 const APP_NAME = 'Seshat';
 const SUPPORT_EMAIL = 'thisisakash481@gmail.com';
 
-/**
- * Common email sender.
- *
- * Resend can return an API-level error through the `error`
- * property without throwing an exception.
- *
- * Therefore, checking only `try/catch` is not sufficient.
- */
-async function sendEmail(options: {
-  to: string;
-  subject: string;
-  html: string;
-  text?: string;
-}) {
+async function sendEmail(options: { to: string; subject: string; html: string; text?: string }) {
   try {
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
@@ -33,18 +19,6 @@ async function sendEmail(options: {
       text: options.text,
     });
 
-    /**
-     * IMPORTANT:
-     *
-     * Resend may return:
-     *
-     * {
-     *   data: null,
-     *   error: {...}
-     * }
-     *
-     * without throwing.
-     */
     if (error) {
       logger.error('Resend rejected email', {
         to: options.to,
@@ -73,15 +47,8 @@ async function sendEmail(options: {
   }
 }
 
-/**
- * ==================== SEND VERIFICATION EMAIL ====================
- */
-export async function sendVerificationEmail(
-  to: string,
-  token: string,
-) {
-  const verificationUrl =
-    `${env.CLIENT_URL}/verify-email?token=${encodeURIComponent(token)}`;
+export async function sendVerificationEmail(to: string, token: string) {
+  const verificationUrl = `${env.CLIENT_URL}/verify-email?token=${encodeURIComponent(token)}`;
 
   const expiryHours = 24;
 
@@ -270,15 +237,8 @@ ${APP_NAME} Team
   });
 }
 
-/**
- * ==================== SEND PASSWORD RESET EMAIL ====================
- */
-export async function sendPasswordResetEmail(
-  to: string,
-  token: string,
-) {
-  const resetUrl =
-    `${env.CLIENT_URL}/reset-password?token=${encodeURIComponent(token)}`;
+export async function sendPasswordResetEmail(to: string, token: string) {
+  const resetUrl = `${env.CLIENT_URL}/reset-password?token=${encodeURIComponent(token)}`;
 
   const expiryHours = 1;
 
@@ -493,15 +453,7 @@ ${APP_NAME} Team
   });
 }
 
-/**
- * ==================== SEND WELCOME EMAIL ====================
- *
- * Optional email sent after successful verification.
- */
-export async function sendWelcomeEmail(
-  to: string,
-  name: string,
-) {
+export async function sendWelcomeEmail(to: string, name: string) {
   const htmlContent = `
     <!DOCTYPE html>
     <html>
