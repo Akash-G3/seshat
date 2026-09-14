@@ -1,4 +1,3 @@
-
 import { createBrowserRouter } from "react-router-dom";
 import { ProtectedRoute } from "@routes/ProtectedRoute";
 import { PublicOnlyRoute } from "@routes/PublicOnlyRoute";
@@ -13,8 +12,6 @@ export const router = createBrowserRouter([
   { path: "/", element: <Home /> },
   { path: "/share/:token", element: <PublicSharePage /> },
   {
-    // Email verification must remain publicly reachable because the user
-    // does not have an authenticated session while verifying their email.
     path: "/verify-email",
     element: <VerifyEmailPage />,
   },

@@ -1,4 +1,3 @@
-
 import {
   createContext,
   useContext,
@@ -23,9 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
-    // Public pages do not need an authenticated workspace request.
-    // This also prevents expected 401s from appearing on the login/signup
-    // pages when there is no existing session.
+ 
     const pathname = window.location.pathname;
     const isPublicPath =
       PUBLIC_PATHS.includes(pathname) ||

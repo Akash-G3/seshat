@@ -1,9 +1,4 @@
-/**
- * src/lib/api-client.ts
- *
- * Single axios instance for the whole app. `withCredentials: true` is
- * required for the httpOnly access/refresh cookies to be sent and received.
- */
+
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 
 type RetriableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };

@@ -6,8 +6,6 @@ interface Props {
   footer: ReactNode;
 }
 
-/** Shared shell for Login/Signup — keeps the auth flow visually
- *  consistent with the rest of the app instead of default Tailwind grays. */
 export function AuthLayout({ title, children, footer }: Props) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg-subtle px-4">

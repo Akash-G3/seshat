@@ -18,15 +18,7 @@ interface Props {
 
 const SAVE_DEBOUNCE_MS = 800;
 
-/**
- * BlockNote owns the live document state. React should not mirror the whole
- * document on every keystroke; doing so makes the parent tree participate in
- * editor typing and creates unnecessary renders.
- *
- * The editor instance is keyed by noteId by NoteEditorPane, so switching
- * notes creates a fresh BlockNote instance and this component's cleanup is the
- * final save boundary.
- */
+
 export function NoteEditor({
   noteId,
   title,

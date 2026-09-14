@@ -1,4 +1,3 @@
-// apps/web/src/features/home/Home.tsx
 import { Link } from "react-router-dom";
 
 export function Home() {

@@ -1,11 +1,6 @@
-
-//--UI redesign
-
 import { forwardRef } from "react";
 import type { ButtonHTMLAttributes } from "react";
 
-// A small square button for icon-only actions (rename, delete, add).
-// Consumers can hide this button on hover when an action should stay visually quiet.
 interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "default" | "danger";
   /** Persistent "on" state (e.g. the currently open panel) — a soft accent pill, not just a hover tint. */

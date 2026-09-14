@@ -1,5 +1,3 @@
-// Simple centered confirm modal — used for destructive actions (delete notebook/note).
-// Deliberately plain: a title, a message, cancel + confirm. No animation library needed.
 interface ConfirmDialogProps {
   open: boolean;
   title: string;
