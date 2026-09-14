@@ -1,4 +1,4 @@
-import { LogOut, Moon, Settings, Sun, KeyRound } from "lucide-react";
+import { LogOut, Moon, Sun} from "lucide-react";
 import { DropdownMenu, DropdownMenuItem } from "@components/ui/DropdownMenu";
 import { useTheme } from "@app/ThemeContext";
 import { useLogout } from "@features/auth/useLogout";
@@ -30,8 +30,6 @@ export function Profile() {
         <p className="truncate text-sm font-medium text-text-primary">{workspace?.name ?? "Workspace"}</p>
         <p className="text-xs text-text-muted">Account</p>
       </div>
-      <DropdownMenuItem onClick={() => {}} icon={<Settings size={14} />}>Settings</DropdownMenuItem>
-      <DropdownMenuItem onClick={() => {}} icon={<KeyRound size={14} />}>Change password</DropdownMenuItem>
       <DropdownMenuItem onClick={toggleTheme} icon={theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}>
         {theme === "dark" ? "Light theme" : "Dark theme"}
       </DropdownMenuItem>
