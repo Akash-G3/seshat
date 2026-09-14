@@ -1,41 +1,103 @@
 import { env } from '../../config/env.js';
 import { EApplicationEnvironment } from '../../constants/application';
-import util from 'util';
+import util from 'node:util';
 import path from 'node:path';
 import { createLogger, format, transports } from 'winston';
 import { ConsoleTransportInstance, FileTransportInstance } from 'winston/lib/winston/transports';
 import { red, blue, yellow, green, magenta } from 'colorette';
 import * as sourceMapSupport from 'source-map-support';
 
-//Linking trace support  [source map]
 sourceMapSupport.install();
 
-//Colorette fn for colorized terminal
 const colorizeLevel = (level: string) => {
-  switch (level) {
+  switch (level.toUpperCase()) {
     case 'ERROR':
-      return red(level);
-    case 'INFO':
-      return blue(level);
+      return red(level.toUpperCase());
     case 'WARN':
-      return yellow(level);
+      return yellow(level.toUpperCase());
+    case 'INFO':
+      return blue(level.toUpperCase());
     default:
-      return level;
+      return level.toUpperCase();
   }
 };
 
+/**
+ * Winston stores metadata as properties on the info object. This helper keeps
+ * the console/file format predictable and, importantly, preserves Error
+ * objects instead of reducing them to `{}`.
+ */
+const serialize = (value: unknown): unknown => {
+  if (value instanceof Error) {
+    return {
+      name: value.name,
+      message: value.message,
+      stack: value.stack ?? null,
+      ...(value.cause !== undefined ? { cause: serialize(value.cause) } : {}),
+    };
+  }
+
+  if (value instanceof Date) return value.toISOString();
+
+  if (Array.isArray(value)) return value.map(serialize);
+
+  if (value && typeof value === 'object') {
+    const output: Record<string, unknown> = {};
+    for (const [key, item] of Object.entries(value)) {
+      output[key] = serialize(item);
+    }
+    return output;
+  }
+
+  return value;
+};
+
+const getMeta = (info: Record<string, unknown>) => {
+  const excluded = new Set(['level', 'message', 'timestamp', Symbol.for('level'), Symbol.for('message')]);
+  const meta: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(info)) {
+    if (!excluded.has(key)) meta[key] = value;
+  }
+
+  // Avoid the old nested `defaultMeta: { meta: {} }` shape while remaining
+  // compatible with existing calls such as logger.error('...', { meta: ... }).
+  if (meta.meta && typeof meta.meta === 'object') {
+    const nested = meta.meta as Record<string, unknown>;
+    delete meta.meta;
+    Object.assign(meta, nested);
+  }
+
+  return serialize(meta) as Record<string, unknown>;
+};
+
 const consoleLogFormat = format.printf((info) => {
-  const { level, message, timestamp, meta = {} } = info;
-  const customLevel = colorizeLevel(level.toUpperCase());
-  const customTimestamp = green(timestamp as string);
-  const customMessage = message;
-  const customMeta = util.inspect(meta, {
-    showHidden: false,
+  const timestamp = String(info.timestamp ?? new Date().toISOString());
+  const level = colorizeLevel(String(info.level));
+  const message = String(info.message ?? '');
+  const meta = getMeta(info);
+
+  const metaText = util.inspect(meta, {
     depth: null,
     colors: true,
+    compact: false,
+    maxArrayLength: null,
+    maxStringLength: null,
+    breakLength: 120,
   });
-  const customLog = `${customLevel} [${customTimestamp}] ${customMessage}\n${magenta('META')} ${customMeta}\n`;
-  return customLog;
+
+  return `${level} [${green(timestamp)}] ${message}\n${magenta('META')} ${metaText}\n`;
+});
+
+const jsonLogFormat = format.printf((info) => {
+  const meta = getMeta(info);
+
+  return JSON.stringify({
+    timestamp: info.timestamp,
+    level: String(info.level).toLowerCase(),
+    message: info.message,
+    ...meta,
+  });
 });
 
 const consoleTransport = (): Array<ConsoleTransportInstance> => {
@@ -43,55 +105,30 @@ const consoleTransport = (): Array<ConsoleTransportInstance> => {
     return [
       new transports.Console({
         level: 'info',
-        format: format.combine(format.timestamp(), consoleLogFormat),
+        format: format.combine(
+          format.timestamp(),
+          format.errors({ stack: true }),
+          consoleLogFormat,
+        ),
       }),
     ];
   }
+
   return [];
 };
 
-//filelog formmat
-
-const fileLogFormat = format.printf((info) => {
-  const { level, message, timestamp, meta = {} } = info;
-
-  const logMeta: Record<string, unknown> = {};
-
-  for (const [key, value] of Object.entries(meta)) {
-    if (value instanceof Error) {
-      logMeta[key] = {
-        name: value.name,
-        message: value.message,
-        trace: value.stack || '',
-      };
-    } else {
-      logMeta[key] = value;
-    }
-  }
-
-  const logData = {
-    level: level.toLowerCase(),
-    message,
-    timestamp,
-    meta: logMeta,
-  };
-
-  return JSON.stringify(logData, null, 4);
-});
-
-const FileTransport = (): Array<FileTransportInstance> => {
-  return [
-    new transports.File({
-      filename: path.join(__dirname, '../', '../', '../', 'logs', `${env.NODE_ENV}.log`),
-      level: 'info',
-      format: format.combine(format.timestamp(), fileLogFormat),
-    }),
-  ];
-};
+const fileTransport = (): Array<FileTransportInstance> => [
+  new transports.File({
+    filename: path.join(__dirname, '../', '../', '../', 'logs', `${env.NODE_ENV}.log`),
+    level: 'info',
+    format: format.combine(
+      format.timestamp(),
+      format.errors({ stack: true }),
+      jsonLogFormat,
+    ),
+  }),
+];
 
 export default createLogger({
-  defaultMeta: {
-    meta: {},
-  },
-  transports: [...FileTransport(), ...consoleTransport()],
+  transports: [...fileTransport(), ...consoleTransport()],
 });
