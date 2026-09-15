@@ -4,7 +4,7 @@ import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 type RetriableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
 export const apiClient = axios.create({
-  baseURL: import.meta.env.API_URL,
+  baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true,
 });
 
