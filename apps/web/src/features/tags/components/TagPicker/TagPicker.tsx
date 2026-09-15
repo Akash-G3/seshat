@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import { Plus, Tag as TagIcon, X } from "lucide-react";
 import { useCreateTag, useAttachTag, useDetachTag, useNoteTags, useTags } from "../../hooks/useTags";
-import { IconButton } from "@components/ui/IconButton";
+// import { IconButton } from "@components/ui/IconButton";
 
 interface Props {
   noteId: string;
