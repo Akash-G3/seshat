@@ -7,6 +7,10 @@ import { searchQuerySchema } from './search.validator';
 const router = Router();
 
 router.use(requireAuth);
-router.get('/', validateQuery(searchQuerySchema), searchController.search);
+router.get(
+  '/',
+  validateQuery(searchQuerySchema),
+  (req, res, next) => searchController.search(req as any, res, next)
+);
 
 export default router;

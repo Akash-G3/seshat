@@ -32,7 +32,8 @@ export const exportService = {
       const document = await tx.document.create({
         data: {
           ownerId,
-          content: source.document.content,
+          // Line 35 - Around the document create
+          content: source.document.content ?? undefined, // or: source.document.content || undefined
           searchText: source.document.searchText,
         },
       });
@@ -126,7 +127,7 @@ export const exportService = {
         const document = await tx.document.create({
           data: {
             ownerId,
-            content: sourceNote.document.content,
+            content: sourceNote.document.content ?? undefined,
             searchText: sourceNote.document.searchText,
           },
         });
