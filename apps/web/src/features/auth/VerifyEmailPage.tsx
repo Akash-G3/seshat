@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { CheckCircle2, Loader2, MailWarning, XCircle } from "lucide-react";
 import { AxiosError } from "axios";
-import { verifyEmailRequest } from "../auth.api";
-import { AuthLayout } from "./AuthLayout";
-import { ResendVerificationForm } from "./ResendVerification";
+import { verifyEmailRequest } from "./auth.api";
+import { AuthLayout } from "./components/AuthLayout";
+import { ResendVerificationForm } from "./components/ResendVerification";
 
 interface VerifyErrorResponse {
   message?: string;

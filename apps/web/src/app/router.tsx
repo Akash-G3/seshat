@@ -3,7 +3,7 @@ import { ProtectedRoute } from "@routes/ProtectedRoute";
 import { PublicOnlyRoute } from "@routes/PublicOnlyRoute";
 import { LoginForm } from "@features/auth/LoginForm";
 import { SignupForm } from "@features/auth/SignupForm";
-import { VerifyEmailPage } from "@features/auth/components/VerifyEmailPage";
+import { VerifyEmailPage } from "@/features/auth/VerifyEmailPage";
 import { Workspace } from "@/features/workspace/pages/workspace";
 import { Home } from "@features/home/Home";
 import { PublicSharePage } from "@features/share/pages/PublicSharePage";
